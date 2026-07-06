@@ -1,12 +1,18 @@
 ---
+import SubscribeForm from './SubscribeForm.astro';
 const year = new Date().getFullYear();
 ---
 <footer class="border-t border-border py-12">
-  <div class="container mx-auto flex max-w-5xl flex-col items-center gap-3 px-6 text-sm text-muted-foreground sm:flex-row sm:justify-between">
-    <p>© {year} AnantaOps. All rights reserved.</p>
-    <div class="flex gap-6">
-      <a href="https://anantaops.github.io" class="hover:text-foreground">Product</a>
-      <a href="https://anantaops.github.io#contact" class="hover:text-foreground">Contact</a>
+  <div class="container mx-auto flex max-w-5xl flex-col gap-8 px-6">
+    <SubscribeForm compact />
+
+    <div class="flex flex-col items-center gap-3 text-sm text-muted-foreground sm:flex-row sm:justify-between">
+      <p>© {year} AnantaOps. All rights reserved.</p>
+      <div class="flex gap-6">
+        <a href="/rss.xml" class="hover:text-foreground">RSS</a>
+        <a href="https://anantaops.github.io" class="hover:text-foreground">Product</a>
+        <a href="https://anantaops.github.io#contact" class="hover:text-foreground">Contact</a>
+      </div>
     </div>
   </div>
 </footer>

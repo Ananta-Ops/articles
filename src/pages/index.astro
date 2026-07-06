@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
+import SubscribeForm from '../components/SubscribeForm.astro';
 import { getPublishedArticles, getTagCounts, MAX_VISIBLE_TAGS } from '../lib/articles';
 
 const articles = await getPublishedArticles();
@@ -36,6 +37,12 @@ const hiddenTagCount = tagCounts.length - visibleTags.length;
     </div>
 
     <div class="animate-float pointer-events-none absolute -right-16 top-24 hidden h-64 w-64 rounded-full bg-foreground/5 blur-3xl lg:block" aria-hidden="true"></div>
+  </section>
+
+  <section class="border-b border-border py-12">
+    <div class="container mx-auto max-w-5xl px-6">
+      <SubscribeForm />
+    </div>
   </section>
 
   <section class="py-16">

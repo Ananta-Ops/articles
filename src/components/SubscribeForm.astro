@@ -1,0 +1,90 @@
+---
+// Sign up free at https://buttondown.com, note your account username, and swap it in here.
+// Then in Buttondown's dashboard, enable "RSS to Email" pointed at https://articles.anantaops.com/rss.xml
+// so subscribers get emailed automatically whenever a new article publishes.
+const BUTTONDOWN_USERNAME = 'REPLACE_WITH_YOUR_BUTTONDOWN_USERNAME';
+const subscribeEnabled = BUTTONDOWN_USERNAME !== 'REPLACE_WITH_YOUR_BUTTONDOWN_USERNAME';
+
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+---
+{subscribeEnabled && (
+  <div class={compact ? 'subscribe-form subscribe-form--compact sm:flex-row sm:items-center sm:justify-between' : 'subscribe-form'}>
+    {compact ? (
+      <p class="subscribe-title-compact">New articles by email, roughly weekly.</p>
+    ) : (
+      <div class="subscribe-copy">
+        <p class="subscribe-title">Get new articles by email</p>
+        <p class="subscribe-sub">One email whenever we publish. No spam, unsubscribe anytime.</p>
+      </div>
+    )}
+    <form
+      action={`https://buttondown.com/api/emails/embed-subscribe/${BUTTONDOWN_USERNAME}`}
+      method="post"
+      target="_blank"
+      class="subscribe-form-fields"
+    >
+      <input
+        type="email"
+        name="email"
+        placeholder="you@company.com"
+        required
+        class="subscribe-input rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground outline-none focus-visible:border-foreground/40"
+      />
+      <button
+        type="submit"
+        class="subscribe-submit rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+      >
+        Subscribe
+      </button>
+    </form>
+  </div>
+)}
+
+<style>
+  .subscribe-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .subscribe-form--compact {
+    gap: 0.5rem;
+  }
+
+  .subscribe-title {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: hsl(var(--foreground));
+  }
+
+  .subscribe-sub {
+    font-size: 0.8125rem;
+    color: hsl(var(--muted-foreground));
+    margin-top: 0.15rem;
+  }
+
+  .subscribe-title-compact {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: hsl(var(--muted-foreground));
+    white-space: nowrap;
+  }
+
+  .subscribe-form-fields {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .subscribe-input {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .subscribe-submit {
+    white-space: nowrap;
+  }
+</style>
