@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
+import ShareButtons from '../components/ShareButtons.astro';
 import { getCollection, render } from 'astro:content';
 import { articleSlug, dateFmt, getPublishedArticles } from '../lib/articles';
 
@@ -20,6 +21,8 @@ const related = allArticles
   .filter((a) => articleSlug(a) !== articleSlug(article))
   .filter((a) => a.data.tags.some((t) => article.data.tags.includes(t)))
   .slice(0, 2);
+
+const shareUrl = new URL(`/${articleSlug(article)}/`, Astro.site).toString();
 ---
 <Layout title={`${article.data.title} — AnantaOps Articles`} description={article.data.description} ogType="article">
   <article class="py-20 lg:py-28">
@@ -42,8 +45,16 @@ const related = allArticles
         ))}
       </div>
 
-      <div class="prose-article animate-fade-up stagger-4 mt-10 max-w-none">
+      <div class="animate-fade-up stagger-4 mt-6">
+        <ShareButtons title={article.data.title} url={shareUrl} />
+      </div>
+
+      <div class="prose-article animate-fade-up stagger-5 mt-10 max-w-none">
         <Content />
+      </div>
+
+      <div class="mt-12 border-t border-border pt-8">
+        <ShareButtons title={article.data.title} url={shareUrl} />
       </div>
     </div>
   </article>

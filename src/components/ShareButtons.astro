@@ -1,0 +1,98 @@
+---
+interface Props {
+  title: string;
+  url: string;
+}
+
+const { title, url } = Astro.props;
+
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+
+const links = [
+  {
+    label: 'Share on LinkedIn',
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+    icon: 'linkedin',
+  },
+  {
+    label: 'Share on X',
+    href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+    icon: 'x',
+  },
+  {
+    label: 'Share on Facebook',
+    href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+    icon: 'facebook',
+  },
+  {
+    label: 'Share via email',
+    href: `mailto:?subject=${encodedTitle}&body=${encodedUrl}`,
+    icon: 'mail',
+  },
+];
+---
+<div class="share-buttons" data-share-url={url} data-share-title={title}>
+  <span class="share-label">Share</span>
+
+  {links.map((l) => (
+    <a href={l.href} class="share-btn" target="_blank" rel="noopener noreferrer" aria-label={l.label} title={l.label}>
+      {l.icon === 'linkedin' && (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.44-2.14 2.94v5.66H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.6 0 4.27 2.37 4.27 5.45zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.11 20.45H3.56V9h3.55z"/>
+        </svg>
+      )}
+      {l.icon === 'x' && (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M18.9 2.25h3.07l-6.71 7.67 7.89 10.83h-6.17l-4.84-6.32-5.53 6.32H3.53l7.18-8.2L3.15 2.25h6.32l4.38 5.79zM17.6 19.1h1.7L8.5 4.05H6.68z"/>
+        </svg>
+      )}
+      {l.icon === 'facebook' && (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M13.5 21v-7.2h2.4l.46-2.8h-2.86V9.2c0-.8.26-1.35 1.4-1.35h1.5V5.36c-.26-.04-1.15-.11-2.2-.11-2.19 0-3.7 1.34-3.7 3.79v2.16H8v2.8h2.5V21z"/>
+        </svg>
+      )}
+      {l.icon === 'mail' && (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>
+        </svg>
+      )}
+    </a>
+  ))}
+
+  <button type="button" class="share-btn share-copy" aria-label="Copy link" title="Copy link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+    </svg>
+    <span class="share-copy-label">Copy link</span>
+  </button>
+</div>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLButtonElement>('.share-copy').forEach((btn) => {
+      const container = btn.closest<HTMLElement>('.share-buttons');
+      const url = container?.dataset.shareUrl;
+      if (!url || btn.dataset.wired) return;
+      btn.dataset.wired = 'true';
+
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(url);
+          const label = btn.querySelector('.share-copy-label');
+          if (label) {
+            const original = label.textContent;
+            label.textContent = 'Copied!';
+            btn.classList.add('share-copy--done');
+            setTimeout(() => {
+              label.textContent = original;
+              btn.classList.remove('share-copy--done');
+            }, 1800);
+          }
+        } catch {
+          /* clipboard unavailable, silently ignore */
+        }
+      });
+    });
+  });
+</script>
