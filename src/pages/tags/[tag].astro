@@ -23,6 +23,14 @@ const hiddenTagCount = allTags.length - visibleTags.length;
 <Layout title={`${tag} — Articles — AnantaOps`} description={`Articles tagged "${tag}" from the AnantaOps team.`}>
   <section class="relative overflow-hidden border-b border-border py-20 lg:py-24">
     <div class="absolute inset-0 grid-pattern" aria-hidden="true"></div>
+    <img
+      src="/anantaops-logo.png"
+      alt=""
+      width="700"
+      height="700"
+      class="pointer-events-none absolute -right-24 top-1/2 hidden -translate-y-1/2 opacity-10 dark:brightness-0 dark:invert lg:block"
+      aria-hidden="true"
+    />
     <div class="container relative mx-auto max-w-5xl px-6">
       <a href="/" class="animate-fade-up text-sm text-muted-foreground hover:text-foreground">← All articles</a>
       <h1 class="animate-fade-up stagger-1 mt-4 text-3xl font-bold tracking-tight text-gradient sm:text-4xl">
