@@ -37,6 +37,42 @@ To compile these proto files into usable Go code, we use the Protocol Buffer com
 
 The `user.proto` file defines all the CRUD methods for a specific user. The `service` block contains all the methods we want to expose on our server so a client can invoke them and get a response — and every message referenced by a method has to be defined too, or the proto compiler will throw an error.
 
+```protobuf
+syntax = "proto3";
+option go_package = "./proto";
+
+service UserService {
+  rpc Create(CreateUserRequest) returns (UserProfileResponse);
+  rpc Read(SingleUserRequest) returns (UserProfileResponse);
+  rpc Update(UpdateUserRequest) returns (SuccessResponse);
+  rpc Delete(SingleUserRequest) returns (SuccessResponse);
+}
+
+message CreateUserRequest{
+  string name = 1;
+  string email = 2;
+}
+
+message SingleUserRequest{
+  string id = 1;
+}
+
+message UserProfileResponse{
+  string id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+message SuccessResponse{
+  string response = 1;
+}
+
+message UpdateUserRequest{
+  string id = 1;
+  string name = 2;
+}
+```
+
 Once the proto file is written, compile it from the project root (in this case `grpc-clean`) with:
 
 ```bash
@@ -49,21 +85,388 @@ That adds two more generated files to the proto folder, `user_grpc.pb.go` and `u
 
 The `internal` folder houses the `models` directory, which holds the definition of the entities the application interacts with — in this project, a single `User.go` file defining the user entity. Keeping this separate from the external-facing components keeps the codebase organized and maintainable.
 
+```go
+package models
+
+import "gorm.io/gorm"
+
+type User struct{
+  gorm.Model
+
+  Name string
+  Email string `gorm:"unique;not nul"`
+}
+```
+
+`internal/db/db.go` handles the actual database connection, opened once at startup and handed down to the repository layer:
+
+```go
+package database
+
+import (
+	"log"
+
+	"gorm.io/gorm"
+	"gorm.io/driver/postgres"
+)
+
+func DbConn() *gorm.DB{
+  db, err := gorm.Open(
+    postgres.Open("host=localhost user=medium dbname=medium password=medium port=5432 sslmode=disable"), &gorm.Config{},
+  )
+  if err != nil {
+    log.Fatalf("There was error connecting to the database: %v", err)
+  }
+  return db
+}
+```
+
 ### `pkg/v1` Directory
 
 The `pkg` directory is where the main package of the application lives, versioned under `v1`. It has three important sub-directories — `repository`, `usecase`, and `handler` — plus an `interfaces.go` file.
 
 **`interfaces.go`** defines the interfaces for the Repository and Usecase components — the contract between the different parts of the application, decoupling them so each can be developed and tested in isolation before being wired together.
 
+```go
+package v1
+
+import "github.com/leodahal4/grpc-clean/internal/models"
+
+
+type RepoInterface interface{
+  // creates a user with the data supplied
+  Create(models.User) (models.User, error)
+
+  // get retrieves the user instance
+  Get(id string) (models.User, error)
+
+  // update method updates the user and returns if any error occurred
+  Update(models.User) (error)
+
+  // Deletes the user whose ID is supplied
+  Delete(id string) (error)
+
+  // this method returns user instance by email
+  GetByEmail(email string) (models.User, error)
+}
+
+type UseCaseInterface interface{
+  // creates a user with the data supplied
+  Create(models.User) (models.User, error)
+
+  // get retrieves the user instance
+  Get(id string) (models.User, error)
+
+  // update method updates the user and returns if any error occurred
+  Update(models.User) (error)
+
+  // Deletes the user whose ID is supplied
+  Delete(id string) (error)
+}
+```
+
 **`repository`** contains the implementation of data access methods — communicating with the database (via GORM in this case) to fetch, save, and update data. Isolating data access from business logic keeps the application modular. The repository layer implements the interfaces defined in the usecase layer.
+
+```go
+package repo
+
+import (
+	"github.com/leodahal4/grpc-clean/internal/models"
+	"gorm.io/gorm"
+	interfaces "github.com/leodahal4/grpc-clean/pkg/v1"
+)
+
+type Repo struct {
+  db *gorm.DB
+}
+
+func New(db *gorm.DB) interfaces.RepoInterface {
+  return &Repo{db}
+}
+
+// Create
+//
+// This function creates a new User which was supplied as the argument
+func (repo *Repo) Create(user models.User) (models.User, error){
+  err := repo.db.Create(&user).Error
+
+  return user, err
+}
+
+// Get
+//
+// This function returns the user instance which is
+// saved on the DB and returns to the usecase
+func (repo *Repo) Get(id string) (models.User, error){
+  var user models.User
+  err := repo.db.Where("id = ?", id).First(&user).Error
+
+  return user, err
+}
+
+// Update
+//
+// This function updates the user name to the one specified,
+// as we have email, id and name, so name only gets changed
+func (repo *Repo) Update(user models.User) error{
+  var dbUser models.User
+  if err := repo.db.Where("id = ?", user.ID).First(&dbUser).Error; err != nil {
+    return err
+  }
+  dbUser.Name = user.Name
+  err := repo.db.Save(dbUser).Error
+
+  return err
+}
+
+// Delete
+//
+// This function creates a the User whose ID was supplied as the argument
+func (repo *Repo) Delete(id string) error{
+  err := repo.db.Where("id = ?", id).Delete(&models.User{}).Error
+
+  return err
+}
+
+// GetByEmail
+//
+// This function returns the user instance which is
+// saved on the DB and returns to the usecase
+func (repo *Repo) GetByEmail(email string) (models.User, error){
+  var user models.User
+  err := repo.db.Where("email = ?", email).First(&user).Error
+
+  return user, err
+}
+```
 
 **`usecase`** contains the business logic. `usecase.go` implements the usecase interfaces, handling the actions for each operation (create, update, retrieve) before data reaches the repository. It's the bridge between the handler and the repository, keeping business logic separate from both.
 
+```go
+package usecase
+
+import (
+	"errors"
+
+	"github.com/leodahal4/grpc-clean/internal/models"
+	interfaces "github.com/leodahal4/grpc-clean/pkg/v1"
+	"gorm.io/gorm"
+)
+
+type UseCase struct {
+  repo interfaces.RepoInterface
+}
+
+func New(repo interfaces.RepoInterface) interfaces.UseCaseInterface {
+  return &UseCase{repo}
+}
+
+// Create
+//
+// This function creates a new User which was supplied as the argument
+func (uc *UseCase) Create(user models.User) (models.User, error) {
+  // check if valid email is supplied
+  if _, err := uc.repo.GetByEmail(user.Email); !errors.Is(err, gorm.ErrRecordNotFound){
+    return models.User{}, errors.New("the email is already associated with another user")
+  }
+
+  // email doesnot exist so, now proceed
+  return uc.repo.Create(user)
+}
+
+// Get
+//
+// This function returns the user instance which is
+// saved on the DB and returns to the usecase
+func (uc *UseCase) Get(id string) (models.User, error){
+  var user models.User
+  var err error
+
+  if user, err = uc.repo.Get(id); err != nil{
+    if errors.Is(err, gorm.ErrRecordNotFound){
+      return models.User{}, errors.New("no such user with the id supplied")
+    }
+    // handle the error properly as the error was something else then record not found,
+    // and return to the caller of this function
+    return models.User{}, err
+  }
+
+  return user, nil
+}
+
+// Update
+//
+// This function updates the user name to the one specified,
+// as we have email, id and name, so name only gets changed
+func (uc *UseCase) Update(updateUser models.User) error{
+  var user models.User
+  var err error
+  // check if user exists
+  if user, err = uc.Get(string(updateUser.ID)); err != nil {
+    return err
+  }
+
+  // check if only name is going to change,
+  // as the email cannot be changed
+  if user.Email != updateUser.Email {
+    return errors.New("email cannot be changed")
+  }
+
+  err = uc.repo.Update(updateUser)
+  if err != nil {
+    // handle the error properly as the error might be something worth to debug
+  }
+
+  return nil
+}
+
+// Delete
+//
+// This function creates a the User whose ID was supplied as the argument
+func (uc *UseCase) Delete(id string) error{
+  var err error
+  // check if user exists
+  if _, err = uc.Get(id); err != nil {
+    return err
+  }
+
+  err = uc.repo.Delete(id)
+  if err != nil {
+    // handle the error as it might be something worth to debug
+    return err
+  }
+
+  return nil
+}
+```
+
 **`handler`** contains the gRPC handler functions in `user_service.go` — the functions actually called in response to incoming requests. They process the request, call the appropriate usecase, and return the result to the caller.
+
+```go
+package grpc
+
+import (
+	"context"
+	"errors"
+
+	"github.com/leodahal4/grpc-clean/internal/models"
+	interfaces "github.com/leodahal4/grpc-clean/pkg/v1"
+	pb "github.com/leodahal4/grpc-clean/proto"
+	"google.golang.org/grpc"
+)
+
+ type UserServStruct struct {
+   useCase interfaces.UseCaseInterface
+   pb.UnimplementedUserServiceServer
+ }
+
+func NewServer(grpcServer *grpc.Server, usecase interfaces.UseCaseInterface){
+  userGrpc := &UserServStruct{useCase: usecase}
+  pb.RegisterUserServiceServer(grpcServer, userGrpc)
+}
+
+// Create
+//
+// This function creates a user whose data is supplied
+// through the CreateUserRequest message of proto
+func (srv *UserServStruct) Create(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserProfileResponse, error) {
+  data := srv.transformUserRPC(req)
+  if data.Email == "" || data.Name == "" {
+    return &pb.UserProfileResponse{}, errors.New("please provide all fields")
+  }
+
+  user, err := srv.useCase.Create(data)
+  if err != nil {
+    return &pb.UserProfileResponse{}, err
+  }
+  return srv.transformUserModel(user), nil
+}
+
+// Get
+//
+// This function returns the user instance of which ID
+// is supplied through the SingleUserRequest message field of proto
+func (srv *UserServStruct) Get(ctx context.Context, req *pb.SingleUserRequest) (*pb.UserProfileResponse, error) {
+  id := req.GetId()
+  if id == "" {
+    return &pb.UserProfileResponse{}, errors.New("id cannot be blank")
+  }
+  user, err := srv.useCase.Get(id)
+  if err != nil {
+    return &pb.UserProfileResponse{}, err
+  }
+  return srv.transformUserModel(user), nil
+}
+
+func (srv *UserServStruct) transformUserRPC(req *pb.CreateUserRequest) models.User{
+  return models.User{Name: req.GetName(), Email: req.GetEmail()}
+}
+
+func (srv *UserServStruct) transformUserModel(user models.User) *pb.UserProfileResponse {
+  return &pb.UserProfileResponse{Id: string(user.ID), Name: user.Name, Email: user.Email}
+}
+```
 
 ### `main.go`
 
-`main.go` is the entry point. It calls `initUserServer`, which wires up the usecase and repository dependencies, passes them to the gRPC server, sets the server's address and port, and starts it. Running:
+`main.go` is the entry point. It calls `initUserServer`, which wires up the usecase and repository dependencies, passes them to the gRPC server, sets the server's address and port, and starts it.
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"net"
+
+	interfaces "github.com/leodahal4/grpc-clean/pkg/v1"
+	repo "github.com/leodahal4/grpc-clean/pkg/v1/repository"
+	usecase "github.com/leodahal4/grpc-clean/pkg/v1/usecase"
+	"gorm.io/gorm"
+
+	dbConfig "github.com/leodahal4/grpc-clean/internal/db"
+	"github.com/leodahal4/grpc-clean/internal/models"
+	handler "github.com/leodahal4/grpc-clean/pkg/v1/handler/grpc"
+	"google.golang.org/grpc"
+)
+
+func main() {
+  // connect to the db
+  db := dbConfig.DbConn()
+  migrations(db)
+
+  // add a listener address
+  lis, err := net.Listen("tcp", ":5001")
+  if err != nil {
+    log.Fatalf("ERROR STARTING THE SERVER : %v", err)
+  }
+
+  // start the grpc server
+  grpcServer := grpc.NewServer()
+
+  userUseCase := initUserServer(db)
+  handler.NewServer(grpcServer, userUseCase)
+
+  // start serving to the address
+  log.Fatal(grpcServer.Serve(lis))
+}
+
+func initUserServer(db *gorm.DB) interfaces.UseCaseInterface{
+  userRepo := repo.New(db)
+  return usecase.New(userRepo)
+}
+
+func migrations(db *gorm.DB) {
+  err := db.AutoMigrate(&models.User{})
+  if err != nil {
+    fmt.Println(err)
+  } else {
+    fmt.Println("Migrated")
+  }
+}
+```
+
+Running:
 
 ```bash
 go run cmd/grpc-clean/main.go
@@ -75,11 +478,56 @@ migrates the `User` model and starts the server on port `5001`.
 
 The project includes a test file covering the implemented gRPC handler methods (for this demonstration, just one), to validate that the server behaves as expected across the relevant edge cases — an important step for reliability and stability.
 
+```go
+package grpc_test
+
+import (
+	"context"
+	"testing"
+
+	pb "github.com/leodahal4/grpc-clean/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+func TestCreateUser(t *testing.T){
+  conn, err := grpc.Dial("localhost:5001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+  if err != nil {
+    t.Fatal("the connection with the server cannot be established")
+  }
+  defer conn.Close()
+
+  client := pb.NewUserServiceClient(conn)
+
+  request := &pb.CreateUserRequest{
+    Name: "test",
+    Email: "test12@mail.com",
+  }
+
+  res, err := client.Create(context.Background(), request)
+  if err != nil{
+    t.Fatalf("CREATE FAILED: %v", err)
+  }
+
+  if res.Email != request.Email{
+     t.Errorf("CREATE returned incorrect email, expected %s got %s", request.Email, res.Email)
+  }
+
+  if res.Name != request.Name{
+     t.Errorf("CREATE returned incorrect Name, expected %s got %s", request.Name, res.Name)
+  }
+
+  if res.GetId() == ""{
+    t.Error("CREATE function didnot returned id as the response")
+  }
+}
+```
+
 ## Wrapping Up
 
 This demonstration only implements basic functionality, but because the concerns are cleanly separated, the system can scale up quickly from here.
 
-You can find the full code — proto definitions, `gorm.go`, `User.go`, `usecase.go`, `user_service.go`, and the test suite — at the project repository:
+You can find the full repository — including the generated `.pb.go` files and the `Makefile` — here:
 
 [github.com/leodahal4/grpc-clean](https://github.com/leodahal4/grpc-clean.git)
 
