@@ -3,9 +3,15 @@
 <div id="cursor-spotlight" class="spotlight"></div>
 
 <script>
-  const el = document.getElementById('cursor-spotlight');
+  declare global {
+    interface Window {
+      __spotlightWired?: boolean;
+    }
+  }
 
-  if (el && window.matchMedia('(pointer: fine)').matches) {
+  if (!window.__spotlightWired && window.matchMedia('(pointer: fine)').matches) {
+    window.__spotlightWired = true;
+
     let targetX = window.innerWidth / 2;
     let targetY = window.innerHeight / 3;
     let currentX = targetX;
@@ -15,8 +21,12 @@
     const tick = () => {
       currentX += (targetX - currentX) * 0.12;
       currentY += (targetY - currentY) * 0.12;
-      el.style.setProperty('--spot-x', `${currentX}px`);
-      el.style.setProperty('--spot-y', `${currentY}px`);
+
+      const el = document.getElementById('cursor-spotlight');
+      if (el) {
+        el.style.setProperty('--spot-x', `${currentX}px`);
+        el.style.setProperty('--spot-y', `${currentY}px`);
+      }
 
       if (Math.abs(targetX - currentX) > 0.5 || Math.abs(targetY - currentY) > 0.5) {
         raf = requestAnimationFrame(tick);
@@ -33,7 +43,7 @@
         if (raf === null) raf = requestAnimationFrame(tick);
 
         const overProse = (e.target as HTMLElement)?.closest?.('.prose-article');
-        el.classList.toggle('spotlight--reading', Boolean(overProse));
+        document.getElementById('cursor-spotlight')?.classList.toggle('spotlight--reading', Boolean(overProse));
       },
       { passive: true },
     );

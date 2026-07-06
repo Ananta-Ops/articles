@@ -47,27 +47,41 @@ const links = [
 </header>
 
 <script>
-  const nav = document.getElementById('site-nav');
-  const onScroll = () => {
+  declare global {
+    interface Window {
+      __navWired?: boolean;
+    }
+  }
+
+  function syncNavScroll() {
+    const nav = document.getElementById('site-nav');
     if (!nav) return;
     if (window.scrollY > 12) {
       nav.classList.add('border-border/60', 'bg-background/70', 'backdrop-blur-xl');
     } else {
       nav.classList.remove('border-border/60', 'bg-background/70', 'backdrop-blur-xl');
     }
-  };
-  onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
+  }
 
-  const toggle = document.getElementById('nav-toggle');
-  const menu = document.getElementById('mobile-menu');
-  const iconMenu = document.getElementById('icon-menu');
-  const iconClose = document.getElementById('icon-close');
-  toggle?.addEventListener('click', () => {
-    const isOpen = !menu?.classList.contains('hidden');
-    menu?.classList.toggle('hidden');
-    iconMenu?.classList.toggle('hidden');
-    iconClose?.classList.toggle('hidden');
-    toggle.setAttribute('aria-expanded', String(!isOpen));
-  });
+  document.addEventListener('astro:page-load', syncNavScroll);
+  syncNavScroll();
+
+  if (!window.__navWired) {
+    window.__navWired = true;
+    window.addEventListener('scroll', syncNavScroll, { passive: true });
+
+    document.addEventListener('click', (e) => {
+      const target = (e.target as HTMLElement)?.closest('#nav-toggle');
+      if (!target) return;
+
+      const menu = document.getElementById('mobile-menu');
+      const iconMenu = document.getElementById('icon-menu');
+      const iconClose = document.getElementById('icon-close');
+      const isOpen = !menu?.classList.contains('hidden');
+      menu?.classList.toggle('hidden');
+      iconMenu?.classList.toggle('hidden');
+      iconClose?.classList.toggle('hidden');
+      target.setAttribute('aria-expanded', String(!isOpen));
+    });
+  }
 </script>

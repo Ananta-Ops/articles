@@ -3,17 +3,28 @@
 <div id="nav-progress" class="nav-progress" aria-hidden="true"></div>
 
 <script>
-  const bar = document.getElementById('nav-progress');
-  if (bar) {
+  declare global {
+    interface Window {
+      __navProgressWired?: boolean;
+    }
+  }
+
+  if (!window.__navProgressWired) {
+    window.__navProgressWired = true;
+
     let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 
     document.addEventListener('astro:before-preparation', () => {
+      const bar = document.getElementById('nav-progress');
+      if (!bar) return;
       if (hideTimeout) clearTimeout(hideTimeout);
       bar.classList.remove('nav-progress--done');
       bar.classList.add('nav-progress--active');
     });
 
     document.addEventListener('astro:page-load', () => {
+      const bar = document.getElementById('nav-progress');
+      if (!bar) return;
       bar.classList.add('nav-progress--done');
       hideTimeout = setTimeout(() => {
         bar.classList.remove('nav-progress--active', 'nav-progress--done');
