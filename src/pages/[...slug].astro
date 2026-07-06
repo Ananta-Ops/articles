@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { getCollection, render } from 'astro:content';
+import { articleSlug, dateFmt, getPublishedArticles } from '../lib/articles';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles', ({ data }) => !data.draft);
+  return articles.map((article) => ({
+    params: { slug: article.id.replace(/\.mdx$/, '') },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+
+const allArticles = await getPublishedArticles();
+const related = allArticles
+  .filter((a) => articleSlug(a) !== articleSlug(article))
+  .filter((a) => a.data.tags.some((t) => article.data.tags.includes(t)))
+  .slice(0, 2);
+---
+<Layout title={`${article.data.title} — AnantaOps Articles`} description={article.data.description} ogType="article">
+  <article class="py-20 lg:py-28">
+    <div class="container mx-auto max-w-3xl px-6">
+      <a href="/" class="animate-fade-up text-sm text-muted-foreground hover:text-foreground">← All articles</a>
+
+      <div class="animate-fade-up stagger-1 mt-6 flex items-center gap-2 text-xs font-mono text-muted-foreground">
+        <time datetime={article.data.pubDate.toISOString()}>{dateFmt(article.data.pubDate)}</time>
+        <span>·</span>
+        <span>{article.data.author}</span>
+      </div>
+
+      <h1 class="animate-fade-up stagger-2 mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        {article.data.title}
+      </h1>
+
+      <div class="animate-fade-up stagger-3 mt-4 flex flex-wrap gap-2">
+        {article.data.tags.map((tag: string) => (
+          <a href={`/tags/${tag}/`} class="tag-pill">{tag}</a>
+        ))}
+      </div>
+
+      <div class="prose-article animate-fade-up stagger-4 mt-10 max-w-none">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  {related.length > 0 && (
+    <section class="border-t border-border py-16">
+      <div class="container mx-auto max-w-3xl px-6">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-muted-foreground">More on this topic</h2>
+        <div class="mt-6 grid gap-6 sm:grid-cols-2">
+          {related.map((a, i) => <ArticleCard article={a} index={i} />)}
+        </div>
+      </div>
+    </section>
+  )}
+</Layout>

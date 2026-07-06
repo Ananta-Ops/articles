@@ -1,0 +1,36 @@
+---
+title: "Your Observability Stack in 2026: Prometheus 3, Grafana 13, and the Quiet eBPF Takeover"
+description: "Prometheus, Grafana, OpenTelemetry, and Docker haven't stood still. Here's what's actually changed, and what to know before you pick your next infra project."
+pubDate: 2026-05-25
+author: "Mou Sam Dahal"
+tags: ["open-source", "observability", "infrastructure"]
+draft: false
+---
+
+If you built your monitoring stack a few years ago and haven't looked back, it's worth looking back. The core projects — Prometheus, Grafana, Docker — all shipped meaningful changes recently, and the observability landscape around them has consolidated in a specific direction.
+
+## Prometheus 3: the first major release in seven years
+
+Prometheus 3.0 landed in November 2024 — its first major version bump in seven years — with a new React-based UI, native UTF-8 support, Remote Write 2.0, native histograms, and explicit OpenTelemetry compatibility as a headline design goal. That last point matters more than it sounds: Prometheus is no longer just "the metrics format Kubernetes speaks," it's actively positioning itself as an OTel-compatible backend, not a competing standard.
+
+## Grafana 13 adds an AI agent, and Loki gets faster
+
+Grafana 13 shipped in April 2026 with "Grafana Assistant" — an AI agent built into the dashboarding experience — plus a GA gauge panel and topology mapping. The companion Loki overhaul, moving to Kafka-backed ingestion, claims up to 20x less data scanned and 10x faster aggregated queries for log search. If your team has been putting off a Loki upgrade because "it works fine," the query-speed numbers here are worth checking against your own logs bill.
+
+## OpenTelemetry graduated — this is the standard now
+
+OpenTelemetry reached CNCF's top maturity tier (graduated status) in May 2026, with over 12,000 contributors and 2,800+ companies involved. Its JS API downloads went from roughly 75 million to over 200 million monthly in a single year. If you're starting a new service today and still deciding between a vendor-specific instrumentation SDK and OpenTelemetry, this is the point where "wait and see" stops being a defensible choice — OTel is the default, not the alternative.
+
+## Docker's licensing squeeze is real, and it's pushing people toward Cilium/containerd directly
+
+Docker Desktop tightened its licensing terms in December 2024, followed by Docker Hub pull-rate limit changes in March 2025. None of this breaks anything for small teams overnight, but it's part of why more infrastructure-heavy teams are looking directly at containerd and Kubernetes-native tooling instead of routing everything through Docker Desktop as a default dev workflow. Worth noting too: a serious path-traversal vulnerability in Docker Compose (CVE-2025-62725, severity 8.9) was disclosed in October 2025 — a good reminder that "it's just local dev tooling" doesn't mean "it's not worth patching."
+
+Separately, Cilium's eBPF-based networking has become the default CNI on AWS EKS and is now cited by CNCF's own reporting as used in the majority of surveyed production Kubernetes deployments — a real changing of the guard from iptables-based networking that most teams set up years ago and never revisited.
+
+## Kubernetes itself: watch the cgroups v2 requirement
+
+Kubernetes v1.36 ("Haru") shipped in April 2026, with v1.37 following in August. Since v1.35, Kubernetes requires cgroups v2 — which is exactly the kind of dependency-version requirement that quietly breaks a cluster running on older node images during what should have been a routine upgrade. If you haven't checked your node OS's cgroups version against your Kubernetes version recently, that's a five-minute check worth doing before your next upgrade window, not during an incident caused by skipping it.
+
+## The practical takeaway
+
+None of this requires a rip-and-replace. It requires knowing that Prometheus 3 exists before you write new alerting rules against outdated docs, that OTel is now the safe default for new instrumentation, and that a Docker Compose file sitting untouched since 2023 might have a patchable CVE in it. Open source infra doesn't announce its breaking changes loudly — it's on you to go check.

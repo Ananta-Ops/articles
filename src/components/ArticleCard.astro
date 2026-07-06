@@ -1,0 +1,31 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { articleSlug, dateFmt } from '../lib/articles';
+
+interface Props {
+  article: CollectionEntry<'articles'>;
+  index?: number;
+}
+
+const { article, index = 0 } = Astro.props;
+const staggerClass = `stagger-${Math.min((index % 6) + 1, 6)}`;
+---
+<a
+  href={`/${articleSlug(article)}/`}
+  class={`article-card animate-fade-up ${staggerClass} group flex flex-col rounded-lg border border-border bg-card p-6 shadow-card`}
+>
+  <div class="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+    <time datetime={article.data.pubDate.toISOString()}>{dateFmt(article.data.pubDate)}</time>
+    <span>·</span>
+    <span>{article.data.author}</span>
+  </div>
+  <h2 class="mt-3 text-lg font-semibold leading-snug text-foreground group-hover:underline">
+    {article.data.title}
+  </h2>
+  <p class="mt-2 text-sm text-muted-foreground">{article.data.description}</p>
+  <div class="mt-4 flex flex-wrap gap-2">
+    {article.data.tags.map((tag: string) => (
+      <span class="tag-pill pointer-events-none">{tag}</span>
+    ))}
+  </div>
+</a>

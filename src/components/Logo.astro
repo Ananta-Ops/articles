@@ -1,0 +1,16 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+<div class={`flex items-center gap-2 ${className}`}>
+  <img
+    src="/anantaops-logo.png"
+    alt="AnantaOps"
+    class="h-8 w-8 object-contain dark:invert"
+  />
+  <span class="text-lg font-semibold tracking-tight">
+    Ananta<span class="text-gradient">Ops</span>
+  </span>
+</div>

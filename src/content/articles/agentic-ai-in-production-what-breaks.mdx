@@ -1,0 +1,40 @@
+---
+title: "We Read the Reports on AI Agents in Production. Here's Everything That Breaks."
+description: "Multi-agent AI systems fail quietly, not loudly. A checklist of the failure modes that actually show up once agents are handling real work."
+pubDate: 2026-06-29
+author: "Anonymous User"
+tags: ["ai", "agents", "reliability"]
+draft: false
+---
+
+An AI agent that fails loudly — a crash, an exception, an error message — is a good day. The failure mode that actually causes damage is the quiet one: the agent produces something plausible-looking, confidently, and it's wrong in a way nobody notices until the downstream effect shows up somewhere else entirely.
+
+## A concrete example, at real scale
+
+In January 2026, an autonomous booking agent deployed by Air Canada misrouted 1,247 passengers during a weather disruption in Toronto. This wasn't a single bad decision — it was an agent making a series of individually-reasonable-looking choices under conditions its design hadn't anticipated, and nothing in the system flagged that the cumulative effect was a real operational problem until well after the fact.
+
+## The four failure modes that keep showing up
+
+Across incident write-ups and postmortems of agentic AI deployments, the same handful of failure patterns recur:
+
+- **Coordination loops.** Two or more agents each waiting on the other, or repeatedly redoing work because neither has a clear signal that the task is actually complete.
+- **Context blow-up.** An agent's working context grows unbounded across a long task, degrading decision quality in ways that are hard to detect from the outside — the output still looks structured and confident.
+- **Tool misuse.** An agent calls the right tool with subtly wrong parameters, or the wrong tool for a task that superficially resembles one it's handled correctly before.
+- **Goal drift.** Over a long-running task, the agent's actions slowly diverge from the original intent, each individual step still locally plausible.
+
+What ties these together: none of them produce an error message. They produce output that looks like success, which is exactly why they're dangerous — the failure surfaces downstream, in a customer complaint or a data discrepancy, disconnected in time and place from its actual cause.
+
+## MCP adoption is real, and standardizing fast
+
+The Model Context Protocol — the standard for how AI agents call external tools — is now running in limited or broad production at 41% of organizations surveyed in early 2026. Anthropic donated MCP to the newly formed Agentic AI Foundation under the Linux Foundation in December 2025, and OpenAI, Google DeepMind, and Microsoft are all now shipping MCP-compatible tooling. This is genuinely good news for reliability — a common protocol means common tooling for observability and access control — but standardization of the plumbing doesn't solve the coordination-loop or goal-drift problems above. Those are architecture problems, not protocol problems.
+
+## What actually mitigates this in practice
+
+- **Bound the task, explicitly.** An agent should have a clear, checkable definition of "done" for any task it's given — not an open-ended goal it interprets on the fly.
+- **Log intermediate steps, not just final output.** If an agent's only observable artifact is its final action, you can't distinguish "reasoned correctly, unlucky input" from "reasoned incorrectly, got lucky" after the fact. You need the reasoning trail, not just the result.
+- **Put a human checkpoint before anything irreversible.** Sending a message, executing a refund, closing a ticket — anything that can't be cleanly undone should have a review step, until the failure rate for that specific action is well understood and low.
+- **Treat "looks confident" as no signal at all.** AI-generated output's confidence level and its correctness are not correlated the way a human's tone of voice usually is. Build verification into the pipeline, not into your read of the output's tone.
+
+## The honest state of things
+
+Agentic AI is genuinely useful, and we build agents into our own product for exactly that reason. But "useful" and "trustworthy without supervision" are different claims, and most of the industry — including us — is still earning the second one task by task, not by default. The teams doing this well aren't the ones with the most impressive demos. They're the ones who can tell you, specifically, what happens when their agent gets it wrong, and how they'd know.

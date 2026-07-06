@@ -1,0 +1,34 @@
+---
+title: "The Cloud-Native Stack in 2026: What's Actually Winning"
+description: "Kubernetes is basically default now. The interesting fights are one layer up — sidecar-less mesh, WASM's real niche, and what the October DNS outage actually taught us."
+pubDate: 2026-05-18
+author: "Anonymous User"
+tags: ["cloud-native", "kubernetes", "infrastructure"]
+draft: false
+---
+
+Kubernetes stopped being a debate a while ago. The latest CNCF annual survey puts 82% of container users running it in production, up from 66% just a couple of years back. The interesting cloud-native questions in 2026 aren't "should we use Kubernetes" — they're what sits around and inside it.
+
+## The blast-radius lesson from October 2025
+
+On October 20, 2025, a race condition in the DNS automation behind DynamoDB's internal endpoint left AWS's us-east-1 regional endpoint with an empty DNS record. The resulting outage didn't just hit AWS-hosted apps — it took down Slack and the entire Atlassian suite (Jira, Confluence) alongside Snapchat, because enough of the internet's collaboration tooling has a transitive dependency on that one region.
+
+The lesson isn't "avoid us-east-1" — plenty of resilient systems run there fine. It's that blast-radius isolation has to be designed deliberately, at the DNS and multi-region level, not assumed as a side effect of "using the cloud." If your on-call runbook doesn't have an answer for "what happens when our upstream dependency's upstream dependency has a DNS failure," that gap is the same shape as the one that took Slack down for hours.
+
+## Service mesh: sidecars are losing to eBPF
+
+For years, "service mesh" meant a sidecar proxy next to every pod, and everyone quietly accepted the CPU/memory tax as the cost of mTLS and traffic policy. That's changing. Istio's "ambient mesh" — sidecar-less by design — hit general availability in late 2024 and cuts mTLS overhead to roughly 8%, compared to the 166% overhead classic sidecar deployments could impose at scale. Cilium, built on eBPF, crossed 5,000+ production deployments by late 2025, with adopters like Adobe and Bell Canada, and is now the default CNI on AWS EKS.
+
+The "which mesh wins" argument isn't settled — recent large-scale benchmarks at 50,000-pod scale still show real tradeoffs between approaches. But the direction is clear: the sidecar tax is becoming optional, and the teams paying it going forward are increasingly paying it by choice, not by default.
+
+## WASM found its lane, and it's smaller than the hype
+
+WebAssembly's server-side story has matured without becoming what enthusiasts predicted a few years ago. The WASI 0.2 spec and Component Model finalized in early 2026, and Fermyon Spin — now under Akamai after acquisition, and a CNCF Sandbox project — made WASM workloads schedulable inside Kubernetes via a containerd shim. But nobody is running general-purpose microservice backends on WASM in production today. Its real niche is edge functions, FaaS-style short-lived compute, and plugin sandboxing — genuinely useful, just narrower than the "WASM replaces containers" pitch suggested.
+
+## Cost visibility caught up with AI workloads
+
+The FinOps Foundation's most recent annual survey, tracking over $69B in surveyed cloud spend, found 98% of respondents now actively manage AI-specific cloud costs — up from 63% just one survey cycle earlier. That's a fast shift, and it tracks with what we'd expect: teams that shipped AI features fast in 2024-2025 spent 2025-2026 building the cost observability they skipped the first time around.
+
+## What this means for a team that isn't Netflix
+
+Most SMB engineering teams don't need ambient mesh or WASM edge functions. What they do need, from this list: a real answer to the multi-region blast-radius question, because your dependencies' outages are your outages too; and cost visibility on any AI feature before it ships, not three months after the bill arrives. Everything else on this list is worth knowing about, not necessarily worth adopting yet.

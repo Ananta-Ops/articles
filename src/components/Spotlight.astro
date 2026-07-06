@@ -1,0 +1,41 @@
+---
+---
+<div id="cursor-spotlight" class="spotlight"></div>
+
+<script>
+  const el = document.getElementById('cursor-spotlight');
+
+  if (el && window.matchMedia('(pointer: fine)').matches) {
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 3;
+    let currentX = targetX;
+    let currentY = targetY;
+    let raf: number | null = null;
+
+    const tick = () => {
+      currentX += (targetX - currentX) * 0.12;
+      currentY += (targetY - currentY) * 0.12;
+      el.style.setProperty('--spot-x', `${currentX}px`);
+      el.style.setProperty('--spot-y', `${currentY}px`);
+
+      if (Math.abs(targetX - currentX) > 0.5 || Math.abs(targetY - currentY) > 0.5) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        raf = null;
+      }
+    };
+
+    window.addEventListener(
+      'mousemove',
+      (e) => {
+        targetX = e.clientX;
+        targetY = e.clientY;
+        if (raf === null) raf = requestAnimationFrame(tick);
+
+        const overProse = (e.target as HTMLElement)?.closest?.('.prose-article');
+        el.classList.toggle('spotlight--reading', Boolean(overProse));
+      },
+      { passive: true },
+    );
+  }
+</script>

@@ -1,0 +1,48 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { getPublishedArticles, getTagCounts, MAX_VISIBLE_TAGS } from '../lib/articles';
+
+const articles = await getPublishedArticles();
+const tagCounts = await getTagCounts();
+const visibleTags = tagCounts.slice(0, MAX_VISIBLE_TAGS);
+const hiddenTagCount = tagCounts.length - visibleTags.length;
+---
+<Layout title="Articles — AnantaOps">
+  <section class="relative overflow-hidden border-b border-border py-20 lg:py-28">
+    <div class="absolute inset-0 grid-pattern" aria-hidden="true"></div>
+    <div class="absolute inset-0 gradient-hero" aria-hidden="true"></div>
+    <div class="container relative mx-auto max-w-5xl px-6">
+      <h1 class="animate-fade-up text-4xl font-bold tracking-tight text-gradient sm:text-5xl">
+        Articles
+      </h1>
+      <p class="animate-fade-up stagger-1 mt-4 max-w-2xl text-lg text-muted-foreground">
+        Notes from the AnantaOps team on DevOps, AI-assisted engineering, security, and running
+        cloud-native infrastructure — the stuff we actually use to build InsightOps.
+      </p>
+
+      <div class="animate-fade-up stagger-2 mt-8 flex flex-wrap gap-2">
+        {visibleTags.map(({ tag, count }) => (
+          <a href={`/tags/${tag}/`} class="tag-pill">
+            {tag} <span class="ml-1 opacity-60">{count}</span>
+          </a>
+        ))}
+        {hiddenTagCount > 0 && (
+          <a href="/tags/" class="tag-pill tag-pill-more">
+            More <span class="ml-1 opacity-60">+{hiddenTagCount}</span>
+          </a>
+        )}
+      </div>
+    </div>
+
+    <div class="animate-float pointer-events-none absolute -right-16 top-24 hidden h-64 w-64 rounded-full bg-foreground/5 blur-3xl lg:block" aria-hidden="true"></div>
+  </section>
+
+  <section class="py-16">
+    <div class="container mx-auto max-w-5xl px-6">
+      <div class="grid gap-6 sm:grid-cols-2">
+        {articles.map((article, i) => <ArticleCard article={article} index={i} />)}
+      </div>
+    </div>
+  </section>
+</Layout>

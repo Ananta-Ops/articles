@@ -1,0 +1,33 @@
+---
+title: "Prompt Injection Isn't a Research Paper Anymore — It's a Patch Note"
+description: "The exact shape of system that reads your Slack, Jira, and Gmail is the exact shape of system prompt injection targets. Here's what that means in practice."
+pubDate: 2026-06-22
+author: "AnantaOps"
+tags: ["ai", "security", "prompt-injection"]
+draft: false
+---
+
+Any product that reads content from Slack, Jira, Gmail, or Drive and does something intelligent with it — summarize, draft a reply, flag an anomaly — is structurally the exact shape of system prompt injection is built to exploit. We build one of those products. So this isn't a hypothetical write-up for us; it's the threat model we design against every day.
+
+## The incident that made this concrete
+
+Slack AI had a prompt-injection flaw disclosed in August 2024 that's still the most-cited real-world example almost two years later, for good reason: a malicious instruction posted in a *public* channel was enough to get Slack AI to exfiltrate data — including API keys — from *private* channels the attacker had no access to. The AI assistant was doing exactly what it was designed to do: read messages and follow instructions found in them. The vulnerability wasn't a bug in the traditional sense. It was the fundamental design tension of the whole category — an AI assistant that reads untrusted content and also has access to trusted, private data has no reliable way to tell the difference between "content to summarize" and "instructions to follow," unless the system is deliberately built to make that distinction.
+
+## The problem has grown teeth as agents got tool access
+
+Once AI systems don't just read and summarize but take actions — send an email, update a ticket, call an API — a successful prompt injection stops being a data leak and starts being unauthorized action on your behalf. The Model Context Protocol (MCP), which standardizes how AI agents call external tools, has seen over 40 CVEs filed against various implementations between January and April 2026 alone. Security audits found that roughly 82% of scanned MCP implementations were vulnerable to path traversal, and 38-41% lacked authentication entirely. One specific case, CVE-2025-6514 in the mcp-remote package (CVSS 9.6), affected a package with over 437,000 downloads.
+
+Broader audits of production AI deployments found prompt injection present in 73% of the systems reviewed, and 41-44% of agent deployments running with no human-in-the-loop oversight at all — meaning a successful injection in those systems doesn't get caught by a human before an action executes.
+
+## What we actually build against this
+
+A few principles, none of them exotic, all of them non-negotiable for a system that reads third-party content and takes actions:
+
+- **Separate instructions from content, structurally, not just by convention.** Content pulled from a Slack message or an email body is data, never treated as an instruction to the model, regardless of what it says inside it.
+- **Scope what any single action can do.** An AI draft-generation task should never have the same permissions as a human admin — it should be able to draft, not unilaterally send, and it should never have write access broader than the specific record it's working on.
+- **Every tenant boundary applies to AI actions exactly as strictly as it applies to human ones.** An AI task processing one organization's data has no path, structurally, to another organization's data — this is the same multi-tenant isolation discipline that matters everywhere else in the system, applied without exception to AI-driven code paths too.
+- **Keep a human in the loop for anything consequential.** Drafting a reply is low-risk if a human reviews before sending. Auto-sending that same reply without review is a different risk category entirely, and the audit numbers above suggest a lot of production systems are further down that second path than their risk tolerance actually supports.
+
+## The honest framing
+
+We're not writing this because we've solved prompt injection — nobody fully has, it's an open problem in how these systems are built. We're writing it because being upfront about the threat model of a product that reads your Slack and drafts your replies is the only credible way to talk about how we defend against it. A vendor who can't name this risk hasn't thought about it. One who can name it and show their mitigations, at least, is thinking about the right problem.

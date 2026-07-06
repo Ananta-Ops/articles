@@ -1,0 +1,32 @@
+---
+title: "Your On-Call Team Is Drowning: The Alert Fatigue Numbers Nobody Wants to Publish"
+description: "Most alerts aren't actionable, most on-call engineers know it, and most outages that follow were preceded by an ignored warning. This is the problem we started AnantaOps to fix."
+pubDate: 2026-07-06
+author: "Mou Sam Dahal"
+tags: ["devops", "aiops", "incident-response"]
+draft: false
+---
+
+We didn't start building InsightOps because alert fatigue sounded like an interesting problem. We started because the numbers on it are genuinely bad, and most of the industry's response to them is more alerts, not fewer, better ones.
+
+## The numbers are worse than "annoying"
+
+Recent survey data on on-call teams puts 77% of them receiving 10 or more alerts a day. That alone sounds manageable — until you learn that, per the majority of respondents, fewer than 30% of those alerts are actually actionable. Some incident-response platforms report volumes far higher: 2,000+ alerts a week isn't unusual, with only around 3% needing immediate action. Do the math on what that means for a human being on call: dozens of interruptions a day, the overwhelming majority of which teach them nothing except that the next one is also probably noise.
+
+That's exactly how you train a good engineer to ignore a real signal. Catchpoint's SRE report found that roughly 70% of SREs say on-call stress is a direct driver of burnout and attrition, and — this is the number that should worry every engineering leader — 73% had experienced an outage that traced back to an alert that had been ignored. Not missed. Ignored, because the alert stream had already taught the team that most alerts don't matter.
+
+## This isn't a "hire more people" problem
+
+The instinct is to throw more on-call rotation at it, or build a bigger dashboard. Neither fixes the underlying issue, which is that raw alert volume and actionable signal are two different things, and most tooling conflates them. A threshold-based alert on CPU usage fires the same way whether it's a real problem or a scheduled batch job — it has no memory of what "normal" looks like for this specific service, at this specific time, for this specific customer.
+
+## What's actually working
+
+The AIOps market — tooling that applies correlation and anomaly detection instead of static thresholds — was valued at roughly $11.16B in 2025, growing at a 25.3% compound rate, and organizations that have adopted it are reporting 80-95% reductions in alert volume and 50-75% reductions in mean time to resolution. Those aren't modest numbers. They're the difference between an on-call rotation that burns people out and one that's sustainable, because the alerts that do fire are actually worth waking up for.
+
+The mechanism behind that improvement isn't magic — it's correlation. A spike in Slack message volume, a cluster of similar Jira tickets, and an anomalous pattern in your CSV ingestion pipeline, seen separately, are three low-signal noise events. Seen together, correlated against what's normal for your organization specifically, they're one real incident worth a human's attention — and specifically the kind of pattern a static threshold on any single metric will never catch, because no single metric crossed its threshold.
+
+## Why this matters more for smaller teams, not less
+
+Enterprise SRE orgs can staff a dedicated on-call rotation large enough to absorb a bad alert-to-noise ratio. A 40-person company running Jira, Slack, and a handful of critical integrations usually can't — the same three or four engineers are on call every week, and alert fatigue there doesn't just cost sleep, it costs the specific people whose context you can least afford to burn out. That's the actual gap between "alert fatigue is a known problem" and "alert fatigue is solved" — most of the tooling built to solve it assumed a team size and budget that most SMBs don't have.
+
+That gap is the whole reason InsightOps exists: anomaly detection and correlation across the tools a small ops or support team already uses, sized and priced for a team that has three on-call engineers, not thirty. The alert-fatigue numbers above aren't an abstract industry trend for us. They're the specific problem on the other side of every feature we build.

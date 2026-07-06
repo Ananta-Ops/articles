@@ -1,0 +1,40 @@
+---
+title: "Secure Coding Practices That Actually Stick"
+description: "Checklists get ignored. Here's what actually changes how a team writes code — tooling, review habits, and a few hard rules with no exceptions."
+pubDate: 2026-05-04
+author: "Mou Sam Dahal"
+tags: ["security", "engineering-practices"]
+draft: false
+---
+
+Every engineering org has a secure coding checklist somewhere in a wiki. Almost none of them get followed, because a checklist you have to remember to consult is a checklist you'll forget under deadline pressure. What actually works is making the secure path the *only* path — through tooling, defaults, and a small number of non-negotiable rules.
+
+## Put the checks where the code already goes
+
+If a rule lives in a document, it gets skipped. If it lives in a pre-commit hook, a linter rule, or a CI gate, it gets enforced whether anyone remembers it or not. We run:
+
+- **Static analysis** (Semgrep, with custom rules for our own known-bad patterns — like the `urllib.request` calls we standardized away from in favor of `requests.Session` with sane timeouts and connection pooling)
+- **Dependency scanning** (`npm audit`, `pip-audit`, Dependabot) on every PR, not on a monthly cron job
+- **Secret scanning** (gitleaks) as a pre-commit hook *and* a CI check, because pre-commit hooks can be skipped with `--no-verify`
+
+None of this requires an engineer to remember anything. That's the point.
+
+## Validate at the boundary, trust internally
+
+We scope input validation to where untrusted data enters the system — the API layer, the file upload handler, the webhook receiver — and let internal code trust its inputs. Validating the same field five times as it passes through six internal functions doesn't add security; it adds noise that makes the *actual* boundary check harder to find during a review.
+
+## Rate limit anything that touches auth or email
+
+Password reset, invite endpoints, email verification resends, webhook test triggers — anything that sends an email, an SMS, or lets someone probe for valid accounts needs a throttle. We learned this less abstractly than we'd like: an unthrottled resend-verification endpoint is a free tool for spamming arbitrary inboxes, and an unthrottled invite endpoint lets someone enumerate whether an email is already a user. The fix is almost always a few lines — `10/hour` on the register endpoint, `5/hour` on resend — but it has to be there from day one, not bolted on after abuse shows up in the logs.
+
+## Encrypt what needs encrypting, and don't build your own fallback
+
+If you have a field-level encryption key for sensitive data, don't let the code silently fall back to `SECRET_KEY` or some derived value when the real key is missing. A silent fallback means a misconfigured environment degrades security instead of failing loudly — and a missing-env-var bug becomes a data-at-rest weakness nobody notices until an audit.
+
+## Review for intent, not just syntax
+
+A code review that only checks "does this compile and pass tests" misses the questions that actually catch security bugs: *why* does this endpoint skip the org-scoping filter that every other query has? *why* does this Celery task not take an explicit `org_id`? In multi-tenant systems specifically, the single highest-value review question is "does every database lookup and every background task filter by tenant, with no code path that can cross that boundary?" That one question, asked consistently, catches an entire class of bugs before they ship.
+
+## Make the secure default the *only* default
+
+Cookies default to `httpOnly` and `secure`. New API endpoints default to requiring an explicit scope, not defaulting open. New Celery tasks default to requiring an explicit `org_id` parameter — there's no "global" task that can accidentally touch every tenant's data. When the secure choice requires an engineer to *opt out* rather than *opt in*, mistakes stop looking like mistakes and start looking like extra unnecessary work — which is exactly the incentive structure you want.

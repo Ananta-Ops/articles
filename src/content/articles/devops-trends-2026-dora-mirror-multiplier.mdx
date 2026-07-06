@@ -1,0 +1,28 @@
+---
+title: "AI Didn't Fix Your DevOps Problems — It Just Made Them Louder"
+description: "DORA's latest research calls it the 'mirror and multiplier' effect: AI accelerates teams that already have good process, and amplifies the dysfunction of teams that don't."
+pubDate: 2026-06-01
+author: "AnantaOps"
+tags: ["devops", "dora", "engineering-culture"]
+draft: false
+---
+
+DORA's 2025 State of AI-assisted Software Development report contains a finding that should worry any SMB engineering team more than the usual "AI makes you faster" headlines: AI doesn't fix a team's underlying process problems. It amplifies them. DORA calls it the "mirror and multiplier" effect — AI accelerates high-performing teams and makes their good habits more visible, while amplifying the dysfunction — tech debt, unclear ownership, process chaos — of teams that didn't have their house in order to begin with.
+
+## The numbers behind the finding
+
+AI adoption among software professionals hit 90% in DORA's latest cycle, up 14 points year over year, with developers spending roughly two hours a day working directly with AI tools. Throughput is genuinely up across the board. But so is change-failure rate, for teams where AI-generated changes are shipping faster than the team's review and testing process can actually absorb them. Faster isn't automatically better — it's just faster, and "faster at shipping bugs" is a real outcome, not a hypothetical one.
+
+There's a trust gap sitting underneath this too: about 80% of developers report feeling more productive with AI tools, while roughly 30% say they still don't trust the code the AI produces. Both of those things are true for the same people, often about the same tool, on the same day — which tells you the productivity feeling and the actual reliability of the output aren't the same measurement.
+
+## Platform engineering is growing, but not as fast as the hype suggests
+
+Platform engineering adoption sits around 55% of organizations in the latest survey cycle, up from 45% a few years ago — real growth, but analysts have flagged Gartner's often-cited target of 80% of organizations having dedicated platform teams by the end of 2026 as an unrealistic pace. For an SMB without headcount for a dedicated platform team, that gap matters: the "mirror and multiplier" effect specifically punishes teams that don't have the equivalent of platform-team discipline — consistent CI gates, clear ownership boundaries, enforced review standards — whether or not they can afford to call it a platform team.
+
+## On-call tooling is being shaken up in real time
+
+The incident-response tooling market had a genuinely disruptive moment recently: as Atlassian moves to sunset Opsgenie, incident.io launched a "PagerDuty Rescue Program" — an AI-assisted migration path, contract buyouts, and a 99.99% SLA commitment, aimed squarely at teams looking to move off legacy on-call tooling. Whatever tool your team lands on, the underlying lesson from 2025's headline outages — Cloudflare's June global outage caused by a bad file fed into its Bot Management system, and AWS's October DNS-automation failure — is the same: postmortems for infrastructure you don't control are now standard reading material, because your dependency's bad day is your bad day too.
+
+## What this actually means if you're a small team
+
+You don't need an 80-person platform engineering org to benefit from DORA's finding. You need the specific things platform teams provide in miniature: CI gates that don't get skipped under deadline pressure, a change-failure-rate number you actually track (not just ship velocity), and a blameless postmortem habit that includes outages caused by vendors, not just your own code. AI tooling will make whichever of those you already have work better — and will make the ones you don't have missing more painfully than before. The fix isn't "use less AI." It's "fix the process gap AI is currently exposing," which was probably worth fixing anyway.

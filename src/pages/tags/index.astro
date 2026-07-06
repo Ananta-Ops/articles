@@ -1,0 +1,32 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getTagCounts } from '../../lib/articles';
+
+const tagCounts = await getTagCounts();
+---
+<Layout title="Categories — Articles — AnantaOps" description="Browse every topic covered on the AnantaOps articles blog.">
+  <section class="relative overflow-hidden border-b border-border py-20 lg:py-24">
+    <div class="absolute inset-0 grid-pattern" aria-hidden="true"></div>
+    <div class="container relative mx-auto max-w-5xl px-6">
+      <a href="/" class="animate-fade-up text-sm text-muted-foreground hover:text-foreground">← All articles</a>
+      <h1 class="animate-fade-up stagger-1 mt-4 text-3xl font-bold tracking-tight text-gradient sm:text-4xl">
+        Categories
+      </h1>
+      <p class="animate-fade-up stagger-2 mt-3 max-w-2xl text-muted-foreground">
+        Every topic we've written about, {tagCounts.length} in total. Pick one to see the articles tagged with it.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16">
+    <div class="container mx-auto max-w-5xl px-6">
+      <div class="flex flex-wrap gap-2">
+        {tagCounts.map(({ tag, count }, i) => (
+          <a href={`/tags/${tag}/`} class={`tag-pill animate-fade-up stagger-${Math.min((i % 6) + 1, 6)}`}>
+            {tag} <span class="ml-1 opacity-60">{count}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

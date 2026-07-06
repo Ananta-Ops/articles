@@ -1,0 +1,44 @@
+---
+title: "Security Training Isn't Optional — Here's What Every Org Should Actually Teach"
+description: "Annual compliance videos don't stop breaches. Here's the training that does, and why it has to be role-specific instead of one-size-fits-all."
+pubDate: 2026-05-11
+author: "AnantaOps"
+tags: ["security", "culture"]
+draft: false
+---
+
+Most "security training" is a once-a-year compliance video followed by a quiz everyone clicks through without reading. It checks a box for an auditor. It does almost nothing to change behavior, because it's generic, infrequent, and disconnected from the actual work people do day to day. If your org's security posture depends on engineers remembering a video from eleven months ago, it isn't a posture — it's a hope.
+
+## The help desk is the new attack surface
+
+Look at the last few years of headline breaches and a pattern shows up that no phishing-simulation module addresses: a human on a support line, talked into resetting an MFA device for someone who wasn't who they said they were.
+
+Marks & Spencer's April 2025 breach started with attackers impersonating an employee on a phone call to the outsourced IT help desk, convincing them to reset an MFA credential. From there the group exfiltrated `NTDS.dit` and cracked password hashes offline — a six-week outage and, by most reporting, somewhere between £270M and £440M in impact. MGM Resorts' 2023 incident (with an arrest tied to it made in September 2025) followed the same script against Okta's help desk: social engineering to Super Admin access, not a software exploit. Snowflake's 2024 customer-data incidents weren't a Snowflake vulnerability either — they were customer accounts without MFA, compromised by infostealer-harvested credentials, which is exactly why Snowflake now enforces MFA by default and, as of late 2025, blocks password-only logins platform-wide.
+
+None of these needed a zero-day. They needed one support agent, on one call, to make one reasonable-sounding exception. That's the scenario your training has to drill — not "can you spot a phishing email," but "can you refuse to reset an MFA device for someone on the phone who sounds exactly like they should be allowed to ask."
+
+## Training has to match the role
+
+A backend engineer needs to know what SSRF looks like in the codebase they own, how to validate a webhook signature, and why a background job needs an explicit tenant ID. A support agent needs to know how to recognize a social-engineering call asking for a password reset. A finance person needs to know what a business-email-compromise attempt looks like in their inbox. One generic "phishing awareness" module serves none of these well.
+
+The highest-leverage move we've found: pair every *incident retro* — even minor near-misses — with a short, specific write-up that goes to the team whose surface area it touched. Not a company-wide email. A five-minute Slack post to the three engineers who own that service, explaining exactly what happened and exactly what changed. That's training that people actually retain, because it's about code they recognize.
+
+## Teach the "why," not just the "don't"
+
+"Don't commit secrets" is a rule. "Here's what happens after a secret leaks — the key gets scraped by automated scanners within minutes of hitting a public repo, and by the time you notice, it's already been used" is a reason. Rules without reasons get treated as bureaucracy. Reasons stick, because they explain the actual consequence, not just the policy.
+
+## New hires need this on day one, not day ninety
+
+By the time a new engineer's first PR merges, they've already made their first security-relevant decisions — where to put a config value, whether to validate an input, whether to ask before touching a production database. If secure defaults and internal conventions aren't part of onboarding, the new engineer is learning your security culture from whatever code they happen to read first, which may or may not be a good example.
+
+## Run practical exercises, not lectures
+
+A tabletop exercise — "someone calls the help desk claiming to be a VP locked out of MFA, what's the actual verification step before anyone resets anything" — teaches more in twenty minutes than a slide deck teaches in two hours, because it forces people to apply judgment instead of recognize keywords. This matters more, not less, in a world where help-desk and internal-support impersonation increasingly happens over the exact collaboration tools — Slack, Teams — that everyone already trusts by default. The value of the exercise isn't "catching" people who fail it, it's the immediate, specific feedback on what the actual verification step should have been.
+
+## Leadership has to visibly care
+
+If security review is the thing that gets skipped whenever a deadline slips, that's the actual lesson your team learns, no matter what the training slides say. Culture is set by what gets rewarded and what gets waved through, not by what gets said in an all-hands. A CTO who asks "did this get a security review" in the same breath as "is this on schedule" teaches more than any training program can.
+
+## The measure that matters
+
+Don't measure training success by quiz completion rates. Measure it by whether the number of preventable incidents — leaked secrets, missing rate limits, un-scoped queries — goes down over time, and whether people report near-misses without fear of blame. If your team is comfortable saying "I think I just exposed something, can someone look" within minutes of noticing, your training is working. If people hide mistakes until they become incidents, no amount of training will fix the actual problem.

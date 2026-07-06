@@ -1,0 +1,34 @@
+---
+title: "The 19% Slowdown Nobody Wants to Talk About: AI Coding Tools, Honestly"
+description: "Usage and revenue for AI coding tools are going vertical. The evidence on whether they actually make you faster is a lot messier — and worth understanding before you bet your roadmap on it."
+pubDate: 2026-06-15
+author: "Mou Sam Dahal"
+tags: ["ai", "developer-tools", "engineering-practices"]
+draft: false
+---
+
+The adoption numbers for AI coding tools are, frankly, startling. Claude Code hit $1B in annualized revenue about six months after its May 2025 launch, and doubled to $2.5B by February 2026. Cursor's maker, Anysphere, went from $100M to $4B in annualized revenue between January 2025 and May 2026 — one of the fastest B2B scale-ups on record. GitHub Copilot passed 20 million users by mid-2025 and is deployed at roughly 90% of the Fortune 100. A recent survey of 15,000 developers found 73% now use AI coding tools daily, up from 41% just a year prior.
+
+None of that is in dispute. What's genuinely messier is the question underneath all of it: does this actually make developers faster, and is the code any good?
+
+## The METR study everybody misquoted
+
+In July 2025, METR ran a randomized controlled trial and found something that broke the standard narrative: experienced developers using AI tools were 19% *slower*, despite believing — genuinely, not performatively — that they were 20% faster. That gap between felt productivity and measured productivity was the real headline, more than the specific number.
+
+The story didn't end there. A February 2026 correction identified roughly 30-50% selection bias in the original study design, and a larger follow-up — 57 developers, over 800 tasks — found the effect much closer to neutral, around -4%. The honest summary: the original "AI makes you slower" framing was overstated, but so was "AI makes you dramatically faster." The real effect, for experienced developers on familiar codebases, is closer to a wash than either extreme suggested.
+
+That nuance matters more than the punchy version of either finding, because it means the actual answer is "it depends on the task, the codebase, and the developer" — which is a less shareable headline, but the true one.
+
+## The trust gap hasn't closed, and maybe shouldn't
+
+Stack Overflow's most recent developer survey found 84% of respondents use or plan to use AI tools, but only 29% actually trust the output — down 11 points from the year before. The most common complaint isn't "it's wrong," it's "it's almost right but not quite" — code that compiles, looks reasonable, and has a subtle logic error or missing edge case that a confident reviewer will catch and a rushed one won't.
+
+That "almost right" quality is exactly why the security data is concerning. Veracode's research found that 45% of AI-generated code introduces at least one OWASP Top 10 vulnerability category, and that AI-generated code shows a vulnerability rate 2.74x higher than human-written code for the same tasks. This isn't a reason to avoid the tools — it's a reason to never relax the review bar because "the AI wrote it, so it's probably fine." If anything, the review bar for AI-generated code should be higher, not lower, because the failure mode is specifically things that look right.
+
+## The "vibe coding" incidents are real and recent
+
+A handful of 2025-2026 incidents make the abstract risk concrete. The Moltbook app exposed 1.5 million API tokens just three days after launch. Lovable, an AI-assisted app builder, had a broken object-level authorization bug sit open for 48 days before it was fixed. Neither of these happened because the underlying AI model was malicious — they happened because "the AI wrote it and it worked in testing" got treated as sufficient, when it never has been, for AI-written or human-written code alike.
+
+## What we actually do with this
+
+We use AI coding tools daily — for scaffolding, for first-draft implementations, for catching the kind of bug a second pair of eyes catches. What we don't do is skip review because the first draft came from an AI instead of a junior engineer. The review bar that already existed for human-written code — does this handle the tenant-isolation boundary correctly, does this validate its inputs, does this fail closed — applies exactly as strictly, and honestly a little more strictly, to AI-generated code. The tools are genuinely useful. The discipline they require hasn't changed at all.

@@ -1,0 +1,42 @@
+---
+title: "Basic Security Principles Every Engineer Should Know"
+description: "Least privilege, defense in depth, fail securely — the handful of ideas that prevent most of the incidents we actually see."
+pubDate: 2026-04-27
+author: "Anonymous User"
+tags: ["security", "fundamentals"]
+draft: false
+---
+
+Most breaches aren't zero-days. They're a missing access check, a secret committed to a repo, or a default password nobody rotated. The fixes for those are boring, and that's exactly why they get skipped — nobody writes a conference talk about "we set an IAM policy correctly." So here's the boring list, the one we actually hold every engineer at AnantaOps to.
+
+## Least privilege, applied literally
+
+Every service account, API key, and human user should have exactly the access it needs and nothing else. Not "read access to the database" — read access to the three tables it queries. Not "admin on the AWS account" — a scoped IAM role for the one bucket it writes to.
+
+The test we use: if this credential leaked right now, what's the blast radius? If the answer is "the whole production database," the scope is wrong, full stop.
+
+## Defense in depth, not defense in one layer
+
+Assume your first control fails. A WAF rule gets bypassed. An input validator has a gap. A firewall rule gets misconfigured during a migration. Defense in depth means the next layer still holds — parameterized queries behind the WAF, output encoding behind the validator, network segmentation behind the firewall.
+
+This is why "we have a WAF" is not a security answer to "how do you prevent SQL injection." The WAF is layer one. The ORM using parameterized queries is layer two. That's the actual answer.
+
+## Fail securely
+
+When something breaks — an auth check throws an exception, a permission lookup times out, a feature flag service is unreachable — the default behavior has to be deny, not allow. We've seen real production code where a try/catch around a permission check defaulted to `return true` on exception "to avoid blocking users." That line turns a transient Redis blip into an authorization bypass.
+
+## Don't trust client input, ever
+
+Client-side validation is UX, not security. Every request that reaches your backend has to be validated again, because the client is not a system you control — it's a browser tab, a mobile app on a rooted phone, or a curl command someone is running by hand against your API. This applies to headers, cookies, and hidden form fields exactly as much as it applies to visible text inputs.
+
+## Secrets don't belong in code, ever, even "temporarily"
+
+Not in a `.env.example` with a real value "just for testing." Not in a Slack message "I'll rotate it after." Once a secret has touched a git history, a chat log, or a CI log, treat it as burned and rotate it — don't debate whether it was "really" exposed. Use a secrets manager (Vault, AWS Secrets Manager, or even a well-scoped `.env` that's git-ignored and injected at deploy time) and rotate on a schedule, not just on suspicion.
+
+## Log enough to investigate, not so much you leak
+
+You need audit logs to answer "who did what, when" during an incident. You do not need — and should never have — plaintext passwords, full credit card numbers, or session tokens sitting in your logs. We built a magic-byte validator specifically because a naive file-extension check let a renamed executable through as a "CSV upload" — logging that upload with full file contents would have made the log itself a liability.
+
+## The pattern behind all of these
+
+Every one of these principles reduces to the same question: **what happens when this specific thing goes wrong?** Not "will it go wrong" — it will, eventually. What happens when it does. If you can answer that question calmly for every trust boundary in your system, you're most of the way to secure. If you can't, that's the gap to close first — before the next feature, not after.

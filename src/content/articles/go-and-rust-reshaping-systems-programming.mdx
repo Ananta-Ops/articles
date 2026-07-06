@@ -1,0 +1,34 @@
+---
+title: "The Memory-Safety Deadline Already Passed: Where Rust and Go Actually Stand"
+description: "Rust is in the Linux kernel's core language list now. CISA set a memory-safety roadmap deadline. Here's what actually changed versus what's still hype."
+pubDate: 2026-06-08
+author: "Anonymous User"
+tags: ["golang", "rust", "systems-programming"]
+draft: false
+---
+
+For years, "Rust is safer than C" was a talking point at conferences. In late 2025 and into 2026, it turned into a governance decision, a compliance deadline, and a line item in Microsoft's own roadmap. This isn't hype anymore — it's happening in codebases you already depend on.
+
+## Rust is now a core Linux kernel language
+
+At the December 2025 Kernel Summit, Rust was promoted to a core kernel language alongside C and assembly — not an experimental add-on. In-tree Rust components already include the `rnull` block driver, ASIX and Realtek network drivers, and NVIDIA's Nova GPU driver, which had gone through twelve iterations by mid-2026. The DRM subsystem maintainer has said publicly that the subsystem is roughly a year out from requiring Rust and banning new C driver contributions outright. This isn't a rewrite-everything mandate — it's a "new code increasingly has to be memory-safe by default" mandate, which is a meaningfully different and more durable shift.
+
+Android's kernel 6.12, shipping in Android 16, already runs a Rust-based `ashmem` implementation on millions of devices in the field. And the payoff shows up in Google's own numbers: memory-safety vulnerabilities fell below 20% of total Android vulnerabilities in 2025, down from 76% just six years earlier. Rust code in that codebase also shows a 4x lower rollback rate and roughly 25% less code-review time than equivalent C/C++ — which quietly undercuts the old argument that memory safety comes at the cost of developer velocity.
+
+## Microsoft and Cloudflare are rewriting, not just adopting
+
+Microsoft has rewritten over 188,000 lines of Windows kernel and DirectWrite code in Rust, and is porting SymCrypt — the cryptography library shared across Windows, Azure Linux, and Xbox — to Rust as well, with a stated ambition to eliminate C/C++ from new development by 2030. Cloudflare's Pingora, a Rust-based HTTP proxy that replaced their NGINX layer, now serves over a trillion requests a day using 70% less CPU and 67% less memory than what it replaced. These aren't research projects. They're production infrastructure carrying real traffic, at a scale where a 70% CPU reduction is a genuinely large capacity-planning number.
+
+## This isn't Rust-only — it's a memory-safety mandate
+
+CISA and the NSA issued joint guidance in June 2025 setting a January 1, 2026 deadline for vendors building network-facing or cryptographic software to publish memory-safety roadmaps. Notably, the guidance names Rust, Ada, Go, C#, Java, Swift, Python, and JavaScript as acceptable options — it's a memory-safety deadline, not a Rust mandate specifically. That distinction matters for teams already invested in Go: you're not behind because you didn't pick Rust, you're fine because Go is memory-safe by construction for the vast majority of what it does.
+
+## Go keeps winning by just being the substrate
+
+While Rust gets the headline-grabbing kernel and crypto-library stories, Go keeps doing what it's done for a decade: being the language underneath Kubernetes, Docker, Terraform, Prometheus, and etcd — the exact infrastructure layer most ops tooling, including ours, sits on top of. Go 1.26, shipped in February 2026, included the "Green Tea" garbage collector as the default, cutting GC overhead by 10-40% depending on workload — a meaningful, unglamorous improvement to software that was already running most of the world's infrastructure control planes.
+
+There's a second, less obvious Rust story too: JavaScript's own tooling is being rewritten in Rust for speed. VoidZero's Rolldown bundler hit stable 1.0 in May 2026, claiming 10-30x the speed of Rollup, and Oxc/Biome deliver 15-30x faster linting and formatting than the ESLint/Prettier combination most JS teams have used for years — increasingly the default in tools like Vite 8.
+
+## The takeaway for a team that isn't rewriting a kernel
+
+You don't need to rewrite your Python or TypeScript services in Rust tomorrow. What's actually relevant: if you're choosing a language for a new network-facing service or anything handling cryptographic material, memory safety is now a compliance conversation, not a preference, and Go/Rust are both squarely inside the accepted answer set. And if your JS build feels slow, the Rust-powered tooling wave (Rolldown, Oxc, Biome) is mature enough now that switching is a real option, not an experiment.

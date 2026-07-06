@@ -1,0 +1,23 @@
+---
+---
+<div id="nav-progress" class="nav-progress" aria-hidden="true"></div>
+
+<script>
+  const bar = document.getElementById('nav-progress');
+  if (bar) {
+    let hideTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    document.addEventListener('astro:before-preparation', () => {
+      if (hideTimeout) clearTimeout(hideTimeout);
+      bar.classList.remove('nav-progress--done');
+      bar.classList.add('nav-progress--active');
+    });
+
+    document.addEventListener('astro:page-load', () => {
+      bar.classList.add('nav-progress--done');
+      hideTimeout = setTimeout(() => {
+        bar.classList.remove('nav-progress--active', 'nav-progress--done');
+      }, 300);
+    });
+  }
+</script>
