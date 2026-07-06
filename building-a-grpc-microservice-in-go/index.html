@@ -47,26 +47,445 @@
 <p>The heart of our project lies in the <code>proto</code> directory, where we keep all the protobuf definitions that form the foundation of our microservice’s communication protocol. These files specify the methods that can be called, the input and output data types, and any additional options. By using Protocol Buffers, we can ensure efficient and language-agnostic communication between our GRPC server and clients.</p>
 <p>To compile these proto files into usable Go code, we use the Protocol Buffer compiler, <code>protoc</code>. After compilation, the generated Go code is stored in <code>.pb.go</code> files, which contain the data structures and methods necessary for communicating with the GRPC server via the API defined in the proto files.</p>
 <p>The <code>user.proto</code> file defines all the CRUD methods for a specific user. The <code>service</code> block contains all the methods we want to expose on our server so a client can invoke them and get a response — and every message referenced by a method has to be defined too, or the proto compiler will throw an error.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="protobuf"><code><span class="line"><span style="color:#F97583">syntax</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "proto3"</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">option</span><span style="color:#79B8FF"> go_package</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "./proto"</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">service</span><span style="color:#B392F0"> UserService</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">  rpc</span><span style="color:#B392F0"> Create</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">CreateUserRequest</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">returns</span><span style="color:#E1E4E8"> (</span><span style="color:#B392F0">UserProfileResponse</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#F97583">  rpc</span><span style="color:#B392F0"> Read</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">SingleUserRequest</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">returns</span><span style="color:#E1E4E8"> (</span><span style="color:#B392F0">UserProfileResponse</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#F97583">  rpc</span><span style="color:#B392F0"> Update</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">UpdateUserRequest</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">returns</span><span style="color:#E1E4E8"> (</span><span style="color:#B392F0">SuccessResponse</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#F97583">  rpc</span><span style="color:#B392F0"> Delete</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">SingleUserRequest</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">returns</span><span style="color:#E1E4E8"> (</span><span style="color:#B392F0">SuccessResponse</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">message</span><span style="color:#B392F0"> CreateUserRequest</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">  string</span><span style="color:#E1E4E8"> name </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">  string</span><span style="color:#E1E4E8"> email </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 2</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">message</span><span style="color:#B392F0"> SingleUserRequest</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">  string</span><span style="color:#E1E4E8"> id </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">message</span><span style="color:#B392F0"> UserProfileResponse</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">  string</span><span style="color:#E1E4E8"> id </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">  string</span><span style="color:#E1E4E8"> name </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 2</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">  string</span><span style="color:#E1E4E8"> email </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 3</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">message</span><span style="color:#B392F0"> SuccessResponse</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">  string</span><span style="color:#E1E4E8"> response </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">message</span><span style="color:#B392F0"> UpdateUserRequest</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">  string</span><span style="color:#E1E4E8"> id </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">  string</span><span style="color:#E1E4E8"> name </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 2</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
 <p>Once the proto file is written, compile it from the project root (in this case <code>grpc-clean</code>) with:</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">protoc</span><span style="color:#79B8FF"> --go_out=.</span><span style="color:#79B8FF"> --go_opt=paths=source_relative</span><span style="color:#79B8FF"> --go-grpc_out=.</span><span style="color:#79B8FF"> --go-grpc_opt=paths=source_relative</span><span style="color:#9ECBFF"> proto/</span><span style="color:#79B8FF">*</span><span style="color:#9ECBFF">.proto</span></span></code></pre>
 <p>That adds two more generated files to the proto folder, <code>user_grpc.pb.go</code> and <code>user.pb.go</code>, which the server and client both use to initiate connections.</p>
 <h3 id="internal-directory"><code>internal</code> Directory</h3>
 <p>The <code>internal</code> folder houses the <code>models</code> directory, which holds the definition of the entities the application interacts with — in this project, a single <code>User.go</code> file defining the user entity. Keeping this separate from the external-facing components keeps the codebase organized and maintainable.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#F97583">package</span><span style="color:#B392F0"> models</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#9ECBFF"> "</span><span style="color:#B392F0">gorm.io/gorm</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">type</span><span style="color:#B392F0"> User</span><span style="color:#F97583"> struct</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#B392F0">  gorm</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">Model</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  Name </span><span style="color:#F97583">string</span></span>
+<span class="line"><span style="color:#E1E4E8">  Email </span><span style="color:#F97583">string</span><span style="color:#9ECBFF"> `gorm:"unique;not nul"`</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p><code>internal/db/db.go</code> handles the actual database connection, opened once at startup and handed down to the repository layer:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#F97583">package</span><span style="color:#B392F0"> database</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">log</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">gorm.io/gorm</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">gorm.io/driver/postgres</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#B392F0"> DbConn</span><span style="color:#E1E4E8">() </span><span style="color:#F97583">*</span><span style="color:#B392F0">gorm</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">DB</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#E1E4E8">  db, err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> gorm.</span><span style="color:#B392F0">Open</span><span style="color:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#E1E4E8">    postgres.</span><span style="color:#B392F0">Open</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"host=localhost user=medium dbname=medium password=medium port=5432 sslmode=disable"</span><span style="color:#E1E4E8">), </span><span style="color:#F97583">&#x26;</span><span style="color:#B392F0">gorm</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">Config</span><span style="color:#E1E4E8">{},</span></span>
+<span class="line"><span style="color:#E1E4E8">  )</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    log.</span><span style="color:#B392F0">Fatalf</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"There was error connecting to the database: </span><span style="color:#79B8FF">%v</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> db</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
 <h3 id="pkgv1-directory"><code>pkg/v1</code> Directory</h3>
 <p>The <code>pkg</code> directory is where the main package of the application lives, versioned under <code>v1</code>. It has three important sub-directories — <code>repository</code>, <code>usecase</code>, and <code>handler</code> — plus an <code>interfaces.go</code> file.</p>
 <p><strong><code>interfaces.go</code></strong> defines the interfaces for the Repository and Usecase components — the contract between the different parts of the application, decoupling them so each can be developed and tested in isolation before being wired together.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#F97583">package</span><span style="color:#B392F0"> v1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#9ECBFF"> "</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/internal/models</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">type</span><span style="color:#B392F0"> RepoInterface</span><span style="color:#F97583"> interface</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#6A737D">  // creates a user with the data supplied</span></span>
+<span class="line"><span style="color:#B392F0">  Create</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">) (</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // get retrieves the user instance</span></span>
+<span class="line"><span style="color:#B392F0">  Get</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">id</span><span style="color:#F97583"> string</span><span style="color:#E1E4E8">) (</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // update method updates the user and returns if any error occurred</span></span>
+<span class="line"><span style="color:#B392F0">  Update</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">) (</span><span style="color:#F97583">error</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // Deletes the user whose ID is supplied</span></span>
+<span class="line"><span style="color:#B392F0">  Delete</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">id</span><span style="color:#F97583"> string</span><span style="color:#E1E4E8">) (</span><span style="color:#F97583">error</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // this method returns user instance by email</span></span>
+<span class="line"><span style="color:#B392F0">  GetByEmail</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">email</span><span style="color:#F97583"> string</span><span style="color:#E1E4E8">) (</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">type</span><span style="color:#B392F0"> UseCaseInterface</span><span style="color:#F97583"> interface</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#6A737D">  // creates a user with the data supplied</span></span>
+<span class="line"><span style="color:#B392F0">  Create</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">) (</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // get retrieves the user instance</span></span>
+<span class="line"><span style="color:#B392F0">  Get</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">id</span><span style="color:#F97583"> string</span><span style="color:#E1E4E8">) (</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // update method updates the user and returns if any error occurred</span></span>
+<span class="line"><span style="color:#B392F0">  Update</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">) (</span><span style="color:#F97583">error</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // Deletes the user whose ID is supplied</span></span>
+<span class="line"><span style="color:#B392F0">  Delete</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">id</span><span style="color:#F97583"> string</span><span style="color:#E1E4E8">) (</span><span style="color:#F97583">error</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
 <p><strong><code>repository</code></strong> contains the implementation of data access methods — communicating with the database (via GORM in this case) to fetch, save, and update data. Isolating data access from business logic keeps the application modular. The repository layer implements the interfaces defined in the usecase layer.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#F97583">package</span><span style="color:#B392F0"> repo</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/internal/models</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">gorm.io/gorm</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">	interfaces </span><span style="color:#9ECBFF">"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/pkg/v1</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">type</span><span style="color:#B392F0"> Repo</span><span style="color:#F97583"> struct</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  db </span><span style="color:#F97583">*</span><span style="color:#B392F0">gorm</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">DB</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#B392F0"> New</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">db</span><span style="color:#F97583"> *</span><span style="color:#B392F0">gorm</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">DB</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">interfaces</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">RepoInterface</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#F97583"> &#x26;</span><span style="color:#B392F0">Repo</span><span style="color:#E1E4E8">{db}</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// Create</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function creates a new User which was supplied as the argument</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">repo </span><span style="color:#F97583">*</span><span style="color:#B392F0">Repo</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">Create</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">user</span><span style="color:#B392F0"> models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">) (</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#E1E4E8">  err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> repo.db.</span><span style="color:#B392F0">Create</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">&#x26;</span><span style="color:#E1E4E8">user).Error</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> user, err</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// Get</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function returns the user instance which is</span></span>
+<span class="line"><span style="color:#6A737D">// saved on the DB and returns to the usecase</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">repo </span><span style="color:#F97583">*</span><span style="color:#B392F0">Repo</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">Get</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">id</span><span style="color:#F97583"> string</span><span style="color:#E1E4E8">) (</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">  var</span><span style="color:#E1E4E8"> user </span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span></span>
+<span class="line"><span style="color:#E1E4E8">  err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> repo.db.</span><span style="color:#B392F0">Where</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"id = ?"</span><span style="color:#E1E4E8">, id).</span><span style="color:#B392F0">First</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">&#x26;</span><span style="color:#E1E4E8">user).Error</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> user, err</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// Update</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function updates the user name to the one specified,</span></span>
+<span class="line"><span style="color:#6A737D">// as we have email, id and name, so name only gets changed</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">repo </span><span style="color:#F97583">*</span><span style="color:#B392F0">Repo</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">Update</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">user</span><span style="color:#B392F0"> models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">  var</span><span style="color:#E1E4E8"> dbUser </span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> repo.db.</span><span style="color:#B392F0">Where</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"id = ?"</span><span style="color:#E1E4E8">, user.ID).</span><span style="color:#B392F0">First</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">&#x26;</span><span style="color:#E1E4E8">dbUser).Error; err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> err</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">  dbUser.Name </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> user.Name</span></span>
+<span class="line"><span style="color:#E1E4E8">  err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> repo.db.</span><span style="color:#B392F0">Save</span><span style="color:#E1E4E8">(dbUser).Error</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> err</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// Delete</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function creates a the User whose ID was supplied as the argument</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">repo </span><span style="color:#F97583">*</span><span style="color:#B392F0">Repo</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">Delete</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">id</span><span style="color:#F97583"> string</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#E1E4E8">  err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> repo.db.</span><span style="color:#B392F0">Where</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"id = ?"</span><span style="color:#E1E4E8">, id).</span><span style="color:#B392F0">Delete</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">&#x26;</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">{}).Error</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> err</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// GetByEmail</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function returns the user instance which is</span></span>
+<span class="line"><span style="color:#6A737D">// saved on the DB and returns to the usecase</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">repo </span><span style="color:#F97583">*</span><span style="color:#B392F0">Repo</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">GetByEmail</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">email</span><span style="color:#F97583"> string</span><span style="color:#E1E4E8">) (</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">  var</span><span style="color:#E1E4E8"> user </span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span></span>
+<span class="line"><span style="color:#E1E4E8">  err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> repo.db.</span><span style="color:#B392F0">Where</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"email = ?"</span><span style="color:#E1E4E8">, email).</span><span style="color:#B392F0">First</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">&#x26;</span><span style="color:#E1E4E8">user).Error</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> user, err</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
 <p><strong><code>usecase</code></strong> contains the business logic. <code>usecase.go</code> implements the usecase interfaces, handling the actions for each operation (create, update, retrieve) before data reaches the repository. It’s the bridge between the handler and the repository, keeping business logic separate from both.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#F97583">package</span><span style="color:#B392F0"> usecase</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">errors</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/internal/models</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">	interfaces </span><span style="color:#9ECBFF">"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/pkg/v1</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">gorm.io/gorm</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">type</span><span style="color:#B392F0"> UseCase</span><span style="color:#F97583"> struct</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  repo </span><span style="color:#B392F0">interfaces</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">RepoInterface</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#B392F0"> New</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">repo</span><span style="color:#B392F0"> interfaces</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">RepoInterface</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">interfaces</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UseCaseInterface</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#F97583"> &#x26;</span><span style="color:#B392F0">UseCase</span><span style="color:#E1E4E8">{repo}</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// Create</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function creates a new User which was supplied as the argument</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">uc </span><span style="color:#F97583">*</span><span style="color:#B392F0">UseCase</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">Create</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">user</span><span style="color:#B392F0"> models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">) (</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#6A737D">  // check if valid email is supplied</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> _, err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> uc.repo.</span><span style="color:#B392F0">GetByEmail</span><span style="color:#E1E4E8">(user.Email); </span><span style="color:#F97583">!</span><span style="color:#E1E4E8">errors.</span><span style="color:#B392F0">Is</span><span style="color:#E1E4E8">(err, gorm.ErrRecordNotFound){</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#B392F0"> models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">{}, errors.</span><span style="color:#B392F0">New</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"the email is already associated with another user"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // email doesnot exist so, now proceed</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> uc.repo.</span><span style="color:#B392F0">Create</span><span style="color:#E1E4E8">(user)</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// Get</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function returns the user instance which is</span></span>
+<span class="line"><span style="color:#6A737D">// saved on the DB and returns to the usecase</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">uc </span><span style="color:#F97583">*</span><span style="color:#B392F0">UseCase</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">Get</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">id</span><span style="color:#F97583"> string</span><span style="color:#E1E4E8">) (</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">  var</span><span style="color:#E1E4E8"> user </span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span></span>
+<span class="line"><span style="color:#F97583">  var</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">error</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> user, err </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> uc.repo.</span><span style="color:#B392F0">Get</span><span style="color:#E1E4E8">(id); err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> errors.</span><span style="color:#B392F0">Is</span><span style="color:#E1E4E8">(err, gorm.ErrRecordNotFound){</span></span>
+<span class="line"><span style="color:#F97583">      return</span><span style="color:#B392F0"> models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">{}, errors.</span><span style="color:#B392F0">New</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"no such user with the id supplied"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#6A737D">    // handle the error properly as the error was something else then record not found,</span></span>
+<span class="line"><span style="color:#6A737D">    // and return to the caller of this function</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#B392F0"> models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">{}, err</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> user, </span><span style="color:#79B8FF">nil</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// Update</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function updates the user name to the one specified,</span></span>
+<span class="line"><span style="color:#6A737D">// as we have email, id and name, so name only gets changed</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">uc </span><span style="color:#F97583">*</span><span style="color:#B392F0">UseCase</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">Update</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">updateUser</span><span style="color:#B392F0"> models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">  var</span><span style="color:#E1E4E8"> user </span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span></span>
+<span class="line"><span style="color:#F97583">  var</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">error</span></span>
+<span class="line"><span style="color:#6A737D">  // check if user exists</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> user, err </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> uc.</span><span style="color:#B392F0">Get</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">string</span><span style="color:#E1E4E8">(updateUser.ID)); err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> err</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // check if only name is going to change,</span></span>
+<span class="line"><span style="color:#6A737D">  // as the email cannot be changed</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> user.Email </span><span style="color:#F97583">!=</span><span style="color:#E1E4E8"> updateUser.Email {</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> errors.</span><span style="color:#B392F0">New</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"email cannot be changed"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  err </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> uc.repo.</span><span style="color:#B392F0">Update</span><span style="color:#E1E4E8">(updateUser)</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D">    // handle the error properly as the error might be something worth to debug</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#79B8FF"> nil</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// Delete</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function creates a the User whose ID was supplied as the argument</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">uc </span><span style="color:#F97583">*</span><span style="color:#B392F0">UseCase</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">Delete</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">id</span><span style="color:#F97583"> string</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">  var</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">error</span></span>
+<span class="line"><span style="color:#6A737D">  // check if user exists</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> _, err </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> uc.</span><span style="color:#B392F0">Get</span><span style="color:#E1E4E8">(id); err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> err</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  err </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> uc.repo.</span><span style="color:#B392F0">Delete</span><span style="color:#E1E4E8">(id)</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D">    // handle the error as it might be something worth to debug</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> err</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#79B8FF"> nil</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
 <p><strong><code>handler</code></strong> contains the gRPC handler functions in <code>user_service.go</code> — the functions actually called in response to incoming requests. They process the request, call the appropriate usecase, and return the result to the caller.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#F97583">package</span><span style="color:#B392F0"> grpc</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">context</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">errors</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/internal/models</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">	interfaces </span><span style="color:#9ECBFF">"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/pkg/v1</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">	pb </span><span style="color:#9ECBFF">"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/proto</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">google.golang.org/grpc</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583"> type</span><span style="color:#B392F0"> UserServStruct</span><span style="color:#F97583"> struct</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">   useCase </span><span style="color:#B392F0">interfaces</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UseCaseInterface</span></span>
+<span class="line"><span style="color:#B392F0">   pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UnimplementedUserServiceServer</span></span>
+<span class="line"><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#B392F0"> NewServer</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">grpcServer</span><span style="color:#F97583"> *</span><span style="color:#B392F0">grpc</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">Server</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">usecase</span><span style="color:#B392F0"> interfaces</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UseCaseInterface</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#E1E4E8">  userGrpc </span><span style="color:#F97583">:=</span><span style="color:#F97583"> &#x26;</span><span style="color:#B392F0">UserServStruct</span><span style="color:#E1E4E8">{useCase: usecase}</span></span>
+<span class="line"><span style="color:#E1E4E8">  pb.</span><span style="color:#B392F0">RegisterUserServiceServer</span><span style="color:#E1E4E8">(grpcServer, userGrpc)</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// Create</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function creates a user whose data is supplied</span></span>
+<span class="line"><span style="color:#6A737D">// through the CreateUserRequest message of proto</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">srv </span><span style="color:#F97583">*</span><span style="color:#B392F0">UserServStruct</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">Create</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">ctx</span><span style="color:#B392F0"> context</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">Context</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">req</span><span style="color:#F97583"> *</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">CreateUserRequest</span><span style="color:#E1E4E8">) (</span><span style="color:#F97583">*</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UserProfileResponse</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#E1E4E8">  data </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> srv.</span><span style="color:#B392F0">transformUserRPC</span><span style="color:#E1E4E8">(req)</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> data.Email </span><span style="color:#F97583">==</span><span style="color:#9ECBFF"> ""</span><span style="color:#F97583"> ||</span><span style="color:#E1E4E8"> data.Name </span><span style="color:#F97583">==</span><span style="color:#9ECBFF"> ""</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#F97583"> &#x26;</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UserProfileResponse</span><span style="color:#E1E4E8">{}, errors.</span><span style="color:#B392F0">New</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"please provide all fields"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  user, err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> srv.useCase.</span><span style="color:#B392F0">Create</span><span style="color:#E1E4E8">(data)</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#F97583"> &#x26;</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UserProfileResponse</span><span style="color:#E1E4E8">{}, err</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> srv.</span><span style="color:#B392F0">transformUserModel</span><span style="color:#E1E4E8">(user), </span><span style="color:#79B8FF">nil</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// Get</span></span>
+<span class="line"><span style="color:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D">// This function returns the user instance of which ID</span></span>
+<span class="line"><span style="color:#6A737D">// is supplied through the SingleUserRequest message field of proto</span></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">srv </span><span style="color:#F97583">*</span><span style="color:#B392F0">UserServStruct</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">Get</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">ctx</span><span style="color:#B392F0"> context</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">Context</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">req</span><span style="color:#F97583"> *</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">SingleUserRequest</span><span style="color:#E1E4E8">) (</span><span style="color:#F97583">*</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UserProfileResponse</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">error</span><span style="color:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#E1E4E8">  id </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> req.</span><span style="color:#B392F0">GetId</span><span style="color:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> id </span><span style="color:#F97583">==</span><span style="color:#9ECBFF"> ""</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#F97583"> &#x26;</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UserProfileResponse</span><span style="color:#E1E4E8">{}, errors.</span><span style="color:#B392F0">New</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"id cannot be blank"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">  user, err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> srv.useCase.</span><span style="color:#B392F0">Get</span><span style="color:#E1E4E8">(id)</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#F97583"> &#x26;</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UserProfileResponse</span><span style="color:#E1E4E8">{}, err</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> srv.</span><span style="color:#B392F0">transformUserModel</span><span style="color:#E1E4E8">(user), </span><span style="color:#79B8FF">nil</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">srv </span><span style="color:#F97583">*</span><span style="color:#B392F0">UserServStruct</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">transformUserRPC</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">req</span><span style="color:#F97583"> *</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">CreateUserRequest</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#B392F0"> models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">{Name: req.</span><span style="color:#B392F0">GetName</span><span style="color:#E1E4E8">(), Email: req.</span><span style="color:#B392F0">GetEmail</span><span style="color:#E1E4E8">()}</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">srv </span><span style="color:#F97583">*</span><span style="color:#B392F0">UserServStruct</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">transformUserModel</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">user</span><span style="color:#B392F0"> models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">*</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UserProfileResponse</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#F97583"> &#x26;</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UserProfileResponse</span><span style="color:#E1E4E8">{Id: </span><span style="color:#F97583">string</span><span style="color:#E1E4E8">(user.ID), Name: user.Name, Email: user.Email}</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
 <h3 id="maingo"><code>main.go</code></h3>
-<p><code>main.go</code> is the entry point. It calls <code>initUserServer</code>, which wires up the usecase and repository dependencies, passes them to the gRPC server, sets the server’s address and port, and starts it. Running:</p>
+<p><code>main.go</code> is the entry point. It calls <code>initUserServer</code>, which wires up the usecase and repository dependencies, passes them to the gRPC server, sets the server’s address and port, and starts it.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#F97583">package</span><span style="color:#B392F0"> main</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">fmt</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">log</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">net</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">	interfaces </span><span style="color:#9ECBFF">"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/pkg/v1</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">	repo </span><span style="color:#9ECBFF">"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/pkg/v1/repository</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">	usecase </span><span style="color:#9ECBFF">"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/pkg/v1/usecase</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">gorm.io/gorm</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">	dbConfig </span><span style="color:#9ECBFF">"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/internal/db</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/internal/models</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">	handler </span><span style="color:#9ECBFF">"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/pkg/v1/handler/grpc</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">google.golang.org/grpc</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#B392F0"> main</span><span style="color:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D">  // connect to the db</span></span>
+<span class="line"><span style="color:#E1E4E8">  db </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> dbConfig.</span><span style="color:#B392F0">DbConn</span><span style="color:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#B392F0">  migrations</span><span style="color:#E1E4E8">(db)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // add a listener address</span></span>
+<span class="line"><span style="color:#E1E4E8">  lis, err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> net.</span><span style="color:#B392F0">Listen</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"tcp"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">":5001"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    log.</span><span style="color:#B392F0">Fatalf</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"ERROR STARTING THE SERVER : </span><span style="color:#79B8FF">%v</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // start the grpc server</span></span>
+<span class="line"><span style="color:#E1E4E8">  grpcServer </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> grpc.</span><span style="color:#B392F0">NewServer</span><span style="color:#E1E4E8">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  userUseCase </span><span style="color:#F97583">:=</span><span style="color:#B392F0"> initUserServer</span><span style="color:#E1E4E8">(db)</span></span>
+<span class="line"><span style="color:#E1E4E8">  handler.</span><span style="color:#B392F0">NewServer</span><span style="color:#E1E4E8">(grpcServer, userUseCase)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  // start serving to the address</span></span>
+<span class="line"><span style="color:#E1E4E8">  log.</span><span style="color:#B392F0">Fatal</span><span style="color:#E1E4E8">(grpcServer.</span><span style="color:#B392F0">Serve</span><span style="color:#E1E4E8">(lis))</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#B392F0"> initUserServer</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">db</span><span style="color:#F97583"> *</span><span style="color:#B392F0">gorm</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">DB</span><span style="color:#E1E4E8">) </span><span style="color:#B392F0">interfaces</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">UseCaseInterface</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#E1E4E8">  userRepo </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> repo.</span><span style="color:#B392F0">New</span><span style="color:#E1E4E8">(db)</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#E1E4E8"> usecase.</span><span style="color:#B392F0">New</span><span style="color:#E1E4E8">(userRepo)</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#B392F0"> migrations</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">db</span><span style="color:#F97583"> *</span><span style="color:#B392F0">gorm</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">DB</span><span style="color:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#E1E4E8">  err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> db.</span><span style="color:#B392F0">AutoMigrate</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">&#x26;</span><span style="color:#B392F0">models</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">User</span><span style="color:#E1E4E8">{})</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    fmt.</span><span style="color:#B392F0">Println</span><span style="color:#E1E4E8">(err)</span></span>
+<span class="line"><span style="color:#E1E4E8">  } </span><span style="color:#F97583">else</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    fmt.</span><span style="color:#B392F0">Println</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"Migrated"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>Running:</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">go</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> cmd/grpc-clean/main.go</span></span></code></pre>
 <p>migrates the <code>User</code> model and starts the server on port <code>5001</code>.</p>
 <h2 id="testing-our-code">Testing Our Code</h2>
 <p>The project includes a test file covering the implemented gRPC handler methods (for this demonstration, just one), to validate that the server behaves as expected across the relevant edge cases — an important step for reliability and stability.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#F97583">package</span><span style="color:#B392F0"> grpc_test</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">context</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">testing</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">	pb </span><span style="color:#9ECBFF">"</span><span style="color:#B392F0">github.com/leodahal4/grpc-clean/proto</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">google.golang.org/grpc</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">	"</span><span style="color:#B392F0">google.golang.org/grpc/credentials/insecure</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">func</span><span style="color:#B392F0"> TestCreateUser</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">t</span><span style="color:#F97583"> *</span><span style="color:#B392F0">testing</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">T</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#E1E4E8">  conn, err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> grpc.</span><span style="color:#B392F0">Dial</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"localhost:5001"</span><span style="color:#E1E4E8">, grpc.</span><span style="color:#B392F0">WithTransportCredentials</span><span style="color:#E1E4E8">(insecure.</span><span style="color:#B392F0">NewCredentials</span><span style="color:#E1E4E8">()))</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    t.</span><span style="color:#B392F0">Fatal</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"the connection with the server cannot be established"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#F97583">  defer</span><span style="color:#E1E4E8"> conn.</span><span style="color:#B392F0">Close</span><span style="color:#E1E4E8">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  client </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> pb.</span><span style="color:#B392F0">NewUserServiceClient</span><span style="color:#E1E4E8">(conn)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  request </span><span style="color:#F97583">:=</span><span style="color:#F97583"> &#x26;</span><span style="color:#B392F0">pb</span><span style="color:#E1E4E8">.</span><span style="color:#B392F0">CreateUserRequest</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#E1E4E8">    Name: </span><span style="color:#9ECBFF">"test"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">    Email: </span><span style="color:#9ECBFF">"test12@mail.com"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  res, err </span><span style="color:#F97583">:=</span><span style="color:#E1E4E8"> client.</span><span style="color:#B392F0">Create</span><span style="color:#E1E4E8">(context.</span><span style="color:#B392F0">Background</span><span style="color:#E1E4E8">(), request)</span></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> err </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> nil</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#E1E4E8">    t.</span><span style="color:#B392F0">Fatalf</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"CREATE FAILED: </span><span style="color:#79B8FF">%v</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> res.Email </span><span style="color:#F97583">!=</span><span style="color:#E1E4E8"> request.Email{</span></span>
+<span class="line"><span style="color:#E1E4E8">     t.</span><span style="color:#B392F0">Errorf</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"CREATE returned incorrect email, expected </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF"> got </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">, request.Email, res.Email)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> res.Name </span><span style="color:#F97583">!=</span><span style="color:#E1E4E8"> request.Name{</span></span>
+<span class="line"><span style="color:#E1E4E8">     t.</span><span style="color:#B392F0">Errorf</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"CREATE returned incorrect Name, expected </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF"> got </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">, request.Name, res.Name)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">  if</span><span style="color:#E1E4E8"> res.</span><span style="color:#B392F0">GetId</span><span style="color:#E1E4E8">() </span><span style="color:#F97583">==</span><span style="color:#9ECBFF"> ""</span><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#E1E4E8">    t.</span><span style="color:#B392F0">Error</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"CREATE function didnot returned id as the response"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
 <h2 id="wrapping-up">Wrapping Up</h2>
 <p>This demonstration only implements basic functionality, but because the concerns are cleanly separated, the system can scale up quickly from here.</p>
-<p>You can find the full code — proto definitions, <code>gorm.go</code>, <code>User.go</code>, <code>usecase.go</code>, <code>user_service.go</code>, and the test suite — at the project repository:</p>
+<p>You can find the full repository — including the generated <code>.pb.go</code> files and the <code>Makefile</code> — here:</p>
 <p><a href="https://github.com/leodahal4/grpc-clean.git">github.com/leodahal4/grpc-clean</a></p>
 <p>Feel free to open PRs or file issues so this can keep improving.</p>
 <h2 id="references">References</h2>
