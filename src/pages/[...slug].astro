@@ -26,6 +26,14 @@ const shareUrl = new URL(`/${articleSlug(article)}/`, Astro.site).toString();
 ---
 <Layout title={`${article.data.title} — AnantaOps Articles`} description={article.data.description} ogType="article">
   <article class="py-20 lg:py-28">
+    <img
+      src="/anantaops-logo.png"
+      alt=""
+      width="600"
+      height="600"
+      class="pointer-events-none fixed -right-24 top-1/2 hidden -translate-y-1/2 opacity-10 dark:brightness-0 dark:invert lg:block"
+      aria-hidden="true"
+    />
     <div class="container mx-auto max-w-3xl px-6">
       <a href="/" class="animate-fade-up text-sm text-muted-foreground hover:text-foreground">← All articles</a>
 
