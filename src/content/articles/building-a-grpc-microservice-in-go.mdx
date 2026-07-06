@@ -1,0 +1,99 @@
+---
+title: "Building a GRPC Micro-Service in Go: A Comprehensive Guide"
+description: "Creating a GRPC micro-service with Go implementing Clean Architecture."
+pubDate: 2023-02-01
+author: "AnantaOps"
+tags: ["golang", "grpc", "microservices"]
+draft: false
+canonicalUrl: "https://medium.com/@leodahal4/building-a-grpc-micro-service-in-go-a-comprehensive-guide-82b6812ed253"
+originalSource:
+  label: "Medium"
+  url: "https://medium.com/@leodahal4/building-a-grpc-micro-service-in-go-a-comprehensive-guide-82b6812ed253"
+---
+
+Have you heard about the powerful combination of GRPC and Golang — the dynamic duo for building efficient and scalable microservices? GRPC, a high-performance, open-source framework for building remote procedure calls, and Golang, a fast and efficient language, make the perfect pair for developing top-notch microservices. In this article, we will be focusing primarily on the integration of GRPC and Golang to create a user management system by following Clean Architecture principles, as introduced by Uncle Bob, so that our code stays maintainable, scalable, and testable. While GORM, a Go ORM library, will be used to handle the database interactions, it will play a secondary role in our demonstration. So, get ready to learn how to harness the power of GRPC and Golang and see how they can transform your microservices!
+
+Having introduced the dynamic duo of GRPC and Golang, along with GORM and Clean Architecture, let's now take a closer look at each technology and what they bring to the table.
+
+**GRPC:** GRPC is a high-performance, open-source framework for building remote procedure calls (RPCs). It allows for efficient communication between microservices and supports a variety of programming languages, including Golang. ([Learn more about GRPC](https://grpc.io/docs/))
+
+**Golang:** Golang, or simply Go, is a fast and efficient programming language developed by Google. It's known for its simplicity, concurrency support, and strong typing.
+
+**GORM:** GORM is a Go Object Relational Mapping (ORM) library that provides a convenient way to interact with databases. It abstracts away the underlying database operations, making it easier to work with databases in Go. ([Learn more about GORM](http://gorm.io/))
+
+**Clean Architecture:** Clean Architecture is a software design principle introduced by Uncle Bob that advocates for separating the different concerns within an application into distinct layers. By following Clean Architecture principles, we can ensure that our code is maintainable, scalable, and testable. ([Learn more about Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html))
+
+With this brief overview of GRPC, Golang, GORM, and Clean Architecture, we're now ready to dive into the world of microservices and see how they can be built using these technologies!
+
+## Project Structure
+
+The project structure is designed to follow best practices for structuring Go applications, making it easier for developers to follow the code and understand the different components of the system.
+
+### Proto Directory
+
+The heart of our project lies in the `proto` directory, where we keep all the protobuf definitions that form the foundation of our microservice's communication protocol. These files specify the methods that can be called, the input and output data types, and any additional options. By using Protocol Buffers, we can ensure efficient and language-agnostic communication between our GRPC server and clients.
+
+To compile these proto files into usable Go code, we use the Protocol Buffer compiler, `protoc`. After compilation, the generated Go code is stored in `.pb.go` files, which contain the data structures and methods necessary for communicating with the GRPC server via the API defined in the proto files.
+
+The `user.proto` file defines all the CRUD methods for a specific user. The `service` block contains all the methods we want to expose on our server so a client can invoke them and get a response — and every message referenced by a method has to be defined too, or the proto compiler will throw an error.
+
+Once the proto file is written, compile it from the project root (in this case `grpc-clean`) with:
+
+```bash
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/*.proto
+```
+
+That adds two more generated files to the proto folder, `user_grpc.pb.go` and `user.pb.go`, which the server and client both use to initiate connections.
+
+### `internal` Directory
+
+The `internal` folder houses the `models` directory, which holds the definition of the entities the application interacts with — in this project, a single `User.go` file defining the user entity. Keeping this separate from the external-facing components keeps the codebase organized and maintainable.
+
+### `pkg/v1` Directory
+
+The `pkg` directory is where the main package of the application lives, versioned under `v1`. It has three important sub-directories — `repository`, `usecase`, and `handler` — plus an `interfaces.go` file.
+
+**`interfaces.go`** defines the interfaces for the Repository and Usecase components — the contract between the different parts of the application, decoupling them so each can be developed and tested in isolation before being wired together.
+
+**`repository`** contains the implementation of data access methods — communicating with the database (via GORM in this case) to fetch, save, and update data. Isolating data access from business logic keeps the application modular. The repository layer implements the interfaces defined in the usecase layer.
+
+**`usecase`** contains the business logic. `usecase.go` implements the usecase interfaces, handling the actions for each operation (create, update, retrieve) before data reaches the repository. It's the bridge between the handler and the repository, keeping business logic separate from both.
+
+**`handler`** contains the gRPC handler functions in `user_service.go` — the functions actually called in response to incoming requests. They process the request, call the appropriate usecase, and return the result to the caller.
+
+### `main.go`
+
+`main.go` is the entry point. It calls `initUserServer`, which wires up the usecase and repository dependencies, passes them to the gRPC server, sets the server's address and port, and starts it. Running:
+
+```bash
+go run cmd/grpc-clean/main.go
+```
+
+migrates the `User` model and starts the server on port `5001`.
+
+## Testing Our Code
+
+The project includes a test file covering the implemented gRPC handler methods (for this demonstration, just one), to validate that the server behaves as expected across the relevant edge cases — an important step for reliability and stability.
+
+## Wrapping Up
+
+This demonstration only implements basic functionality, but because the concerns are cleanly separated, the system can scale up quickly from here.
+
+You can find the full code — proto definitions, `gorm.go`, `User.go`, `usecase.go`, `user_service.go`, and the test suite — at the project repository:
+
+[github.com/leodahal4/grpc-clean](https://github.com/leodahal4/grpc-clean.git)
+
+Feel free to open PRs or file issues so this can keep improving.
+
+## References
+
+- [GRPC](https://grpc.io/docs/)
+- [GORM](http://gorm.io/)
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Protobuf](https://github.com/protocolbuffers/protobuf/releases)
+- [protoc-gen-go](https://github.com/golang/protobuf/releases)
+- [protoc installation docs](https://grpc.io/docs/protoc-installation/)
+- [Securing protocol buffers](https://grpc.io/docs/guides/auth/)
+- [Protocol buffer performance](https://grpc.io/docs/guides/performance/)
+- [Basics of Protocol Buffers](https://www.tutorialspoint.com/protobuf/index.htm)
+- [Documenting proto files](https://github.com/pseudomuto/protoc-gen-doc)

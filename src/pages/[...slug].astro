@@ -24,7 +24,12 @@ const related = allArticles
 
 const shareUrl = new URL(`/${articleSlug(article)}/`, Astro.site).toString();
 ---
-<Layout title={`${article.data.title} — AnantaOps Articles`} description={article.data.description} ogType="article">
+<Layout
+  title={`${article.data.title} — AnantaOps Articles`}
+  description={article.data.description}
+  ogType="article"
+  canonicalOverride={article.data.canonicalUrl}
+>
   <article class="py-20 lg:py-28">
     <img
       src="/anantaops-logo.png"
@@ -56,6 +61,15 @@ const shareUrl = new URL(`/${articleSlug(article)}/`, Astro.site).toString();
       <div class="animate-fade-up stagger-4 mt-6">
         <ShareButtons title={article.data.title} url={shareUrl} />
       </div>
+
+      {article.data.originalSource && (
+        <p class="animate-fade-up stagger-4 mt-4 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+          Originally published on{' '}
+          <a href={article.data.originalSource.url} target="_blank" rel="noopener noreferrer" class="font-medium text-foreground underline">
+            {article.data.originalSource.label}
+          </a>.
+        </p>
+      )}
 
       <div class="prose-article animate-fade-up stagger-5 mt-10 max-w-none">
         <Content />

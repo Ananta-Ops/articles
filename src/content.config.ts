@@ -10,6 +10,8 @@ const articles = defineCollection({
     author: z.string().default('AnantaOps Team'),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    canonicalUrl: z.string().url().optional(),
+    originalSource: z.object({ label: z.string(), url: z.string().url() }).optional(),
   }),
 });
 
